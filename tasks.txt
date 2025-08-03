@@ -1,0 +1,82 @@
+# Lista de Tareas: Aplicación Flutter con Beacon Bluetooth
+
+## 1. Configuración del Entorno
+- [x] **Instalar Flutter**  
+  Instalar Flutter siguiendo la [guía oficial](https://flutter.dev/docs/get-started/install).
+- [x] **Instalar Visual Studio Code**  
+  Descargar e instalar VS Code.
+- [x] **Instalar Extensiones de Flutter y Dart en VS Code**  
+  Buscar e instalar las extensiones "Flutter" y "Dart" desde el marketplace de VS Code.
+- [x] **Configurar Android SDK**  
+  Asegurarse de tener el Android SDK instalado (puede venir con Android Studio) para emulación y pruebas.
+
+## 2. Creación del Proyecto Flutter
+- [x] **Crear Nuevo Proyecto Flutter**  
+  Ejecutar `flutter create auto_locator` en la terminal o mediante VS Code.
+- [x] **Configurar el Proyecto para Android**  
+  Verificar que el proyecto esté correctamente configurado para compilar en Android.
+
+## 3. Configuración de Permisos y Dependencias
+- [x] **Agregar Permisos en `AndroidManifest.xml`**  
+  Incluir permisos para:
+  - `ACCESS_FINE_LOCATION`
+  - `ACCESS_COARSE_LOCATION`
+  - `BLUETOOTH`
+  - `BLUETOOTH_SCAN`
+  - `BLUETOOTH_CONNECT`
+- [x] **Agregar Dependencias en `pubspec.yaml`**  (Es necesario estar como administrador)
+    geolocator: ^11.0.0
+    google_maps_flutter: ^2.5.3
+    # Paquetes para Bluetooth
+    flutter_blue_plus: ^1.31.16
+    # Gestor de permisos
+    permission_handler: ^11.3.0
+
+## 4. Implementación de la Interfaz de Usuario (UI)
+- [x] **Diseñar la Pantalla Principal**  
+
+## 6. Obtención y Almacenamiento de Ubicación
+- [x] **Integrar el Paquete de Ubicación**  
+  Configurar la obtención de la ubicación GPS mediante `geolocator` o `location`.
+- [x] **Obtener la Ubicación al Detectar la Desconexión**  
+  Programar la lógica para solicitar y capturar la ubicación actual cuando se detecte la desconexión del Beacon.
+- [x] **Guardar la Ubicación Localmente**  
+  Utilizar almacenamiento local (por ejemplo, SharedPreferences o una base de datos ligera) para persistir la ubicación capturada.
+
+## 5. Integración de Funcionalidades con Beacon Bluetooth
+- [ ] **Configurar el Escaneo de Beacon**  
+  - Inicializar el escaneo de dispositivos Bluetooth.
+  - Detectar el Beacon asociado al automóvil.
+- [ ] **Programar la Lógica de Detección**  
+  - Definir la lógica para detectar la desconexión del Beacon.
+  - Monitorear el nivel de señal (RSSI) para determinar la proximidad y detectar cuando el usuario se aleja.
+
+
+## 7. Visualización de la Ubicación en un Mapa
+- [ ] **Integrar Google Maps en la App**  
+  Configurar el paquete `google_maps_flutter` para mostrar la ubicación.
+- [ ] **Mostrar la Ubicación Guardada en el Mapa**  
+  Implementar la funcionalidad para centrar el mapa en la ubicación donde se estacionó el vehículo.
+- [ ] **Ofrecer Opción para Abrir en Google Maps Externo**  
+  Añadir un botón que permita abrir la ubicación en la app de Google Maps, si se desea.
+
+## 8. Pruebas y Optimización
+- [ ] **Probar la Funcionalidad del Beacon y Ubicación**  
+  - Ejecutar pruebas en dispositivo real y/o emulador.
+  - Verificar la detección correcta del Beacon y captura de la ubicación.
+- [ ] **Optimizar el Consumo de Batería**  
+  Revisar y optimizar el uso de sensores y procesos en segundo plano para evitar consumo excesivo.
+
+## 9. Preparación para el Lanzamiento
+- [ ] **Ajustar Detalles de UI y UX**  
+  Revisar y mejorar la interfaz, íconos, y textos.
+- [ ] **Compilar la Aplicación (APK o AAB)**  
+  Realizar la compilación final para distribución.
+- [ ] **Documentar la Aplicación y Configuración**  
+  Preparar la documentación para el uso y mantenimiento de la app.
+
+## 10. Publicación y Mantenimiento
+- [ ] **Publicar en Google Play Store**  
+  Seguir la guía de [publicación de Google Play](https://developer.android.com/distribute/google-play/start).
+- [ ] **Monitorear Feedback y Actualizar**  
+  Realizar actualizaciones y mejoras según el feedback de los usuarios.

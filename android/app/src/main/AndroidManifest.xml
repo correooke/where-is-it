@@ -1,0 +1,98 @@
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools">
+    <!-- Permisos -->
+    <uses-permission android:name="android.permission.INTERNET"/>
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_LOCATION" />
+    <uses-permission android:name="android.permission.ACCESS_BACKGROUND_LOCATION" />
+    <uses-permission android:name="android.permission.ACTIVITY_RECOGNITION" />
+    <!-- Permisos de Bluetooth (si los necesitas) -->
+    <!-- <uses-permission android:name="android.permission.BLUETOOTH" /> -->
+    <!-- <uses-permission android:name="android.permission.BLUETOOTH_SCAN" /> -->
+    <!-- <uses-permission android:name="android.permission.BLUETOOTH_CONNECT" /> -->
+
+    <application
+        android:label="where_is_it"
+        android:icon="@mipmap/ic_launcher">
+        <activity
+            android:name=".MainActivity"
+            android:exported="true"
+            android:launchMode="singleTop"
+            android:theme="@style/LaunchTheme" 
+            android:configChanges="orientation|keyboardHidden|keyboard|screenSize|smallestScreenSize|locale|layoutDirection|fontScale|screenLayout|density|uiMode"
+            android:hardwareAccelerated="true"
+            android:windowSoftInputMode="adjustResize">
+            <meta-data
+              android:name="io.flutter.embedding.android.NormalTheme"
+              android:resource="@style/NormalTheme"
+              />
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN"/>
+                <category android:name="android.intent.category.LAUNCHER"/>
+            </intent-filter>
+        </activity>
+        
+        <!-- Clave de API de Google Maps -->
+        <meta-data
+            android:name="com.google.android.geo.API_KEY"
+            android:value="AIzaSyBhY1hTsmgyp1IS6eNP64J5Kh6DzR21fQw"/>
+        
+        <!-- Flutter Embedding V2 -->
+        <meta-data
+            android:name="flutterEmbedding"
+            android:value="2" />
+
+        <!-- Configuración de canal para location plugin -->
+        <meta-data
+          android:name="com.baseflow.flutter.location.notification_channel_name"
+          android:value="Servicio de Ubicación" />
+        <meta-data
+          android:name="com.baseflow.flutter.location.notification_channel_description"
+          android:value="Permite recibir actualizaciones de ubicación en background" />
+        <meta-data
+          android:name="com.baseflow.flutter.location.notification_icon"
+          android:resource="@mipmap/ic_launcher" />
+        <!-- Icono para flutter_background_service: recurso ic_bg_service_small -->
+        <meta-data
+           android:name="com.pravera.flutter_background_service.notification_icon"
+           android:resource="@drawable/ic_bg_service_small" />
+
+        <!-- ID del canal; debe ser único en tu app -->
+        <meta-data
+        android:name="com.pravera.flutter_background_service.notification_channel_id"
+        android:value="where_is_it_channel" />
+
+        <!-- Nombre visible en Ajustes → Notificaciones -->
+        <meta-data
+        android:name="com.pravera.flutter_background_service.notification_channel_name"
+        android:value="Servicio de estacionamiento" />
+
+        <!-- Servicio para flutter_background_service con tipo location -->
+        <service
+           android:name="id.flutter.flutter_background_service.BackgroundService"
+           android:exported="false"
+           android:foregroundServiceType="location"
+           tools:replace="android:exported" />
+
+        <!-- Servicio de detección de estacionamiento -->
+        <service
+            android:name="com.example.parking_detector_plugin.service.ParkingDetectionService"
+            android:enabled="true"
+            android:exported="false"
+            android:foregroundServiceType="location" />
+
+    </application>
+    <!-- Required to query activities that can process text, see:
+         https://developer.android.com/training/package-visibility and
+         https://developer.android.com/reference/android/content/Intent#ACTION_PROCESS_TEXT.
+
+         In particular, this is used by the Flutter engine in io.flutter.plugin.text.ProcessTextPlugin. -->
+    <queries>
+        <intent>
+            <action android:name="android.intent.action.PROCESS_TEXT"/>
+            <data android:mimeType="text/plain"/>
+        </intent>
+    </queries>
+</manifest>

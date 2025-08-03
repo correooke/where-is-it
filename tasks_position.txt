@@ -1,0 +1,25 @@
+## 6. Obtención y Almacenamiento de Ubicación
+
+- [x] **Instalar e integrar el paquete de ubicación (`geolocator`)**
+  - Agregar `geolocator` en `pubspec.yaml`.
+  - Solicitar los permisos de ubicación necesarios en Android (`ACCESS_FINE_LOCATION` y `ACCESS_COARSE_LOCATION` en `AndroidManifest.xml`).
+  - Manejar el request de permisos en tiempo de ejecución.
+
+- [x] **Crear una función reutilizable para obtener la ubicación actual**
+  - Implementar una función `Future<LatLng> getCurrentLocation()` que devuelva la latitud y longitud actuales.
+  - Usar `Geolocator.getCurrentPosition()` con precisión alta (`LocationAccuracy.high`).
+
+- [x] **Crear un manejador de eventos agnóstico**
+  - Definir una función pública `onExternalTrigger()` que se pueda invocar desde cualquier fuente de evento.
+  - Al ser llamada, esta función debe:
+    1. Obtener la ubicación actual mediante `getCurrentLocation()`.
+    2. Guardar la ubicación localmente.
+    3. Notificar o actualizar el estado de la app si corresponde.
+
+- [x] **Guardar la ubicación en almacenamiento local**
+  - Usar `shared_preferences` para persistir latitud y longitud bajo claves como `"last_latitude"` y `"last_longitude"`.
+  - Crear una función `Future<void> saveLocation(LatLng position)`.
+
+- [x] **Crear una función para recuperar la ubicación guardada**
+  - Implementar `Future<LatLng?> loadLastSavedLocation()` que lea desde `shared_preferences` y reconstruya la posición.
+  - Utilizar esta función para cargar el mapa o mostrar la última ubicación al iniciar la app.

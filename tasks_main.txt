@@ -1,0 +1,85 @@
+# Lista de Acciones: Implementar el Mapa con Última Posición Dummy
+
+## Preparación
+- [x] **Verificar Proyecto Flutter:**  
+  Asegúrate de que tu proyecto Flutter (por ejemplo, "where_is_it") esté funcionando correctamente en VS Code.
+
+## 1. Integrar Google Maps en el Proyecto
+
+- [x] **Agregar la Dependencia:**
+  - Abre el archivo `pubspec.yaml`.
+  - En la sección de dependencias, agrega:
+    ```yaml
+    dependencies:
+      flutter:
+        sdk: flutter
+      google_maps_flutter: ^2.2.0  # O la versión más reciente disponible
+    ```
+- [x] **Actualizar Dependencias:**
+  - Ejecuta en la terminal:
+    ```bash
+    flutter pub get
+    ```
+
+## 2. Configurar la API Key de Google Maps
+
+- [x] **Obtener la API Key:**
+  - Accede a [Google Cloud Console](https://console.cloud.google.com/) y crea (o usa) un proyecto para obtener una API Key para Google Maps.
+  Api Key: AIzaSyBhY1hTsmgyp1IS6eNP64J5Kh6DzR21fQw
+- [x] **Configurar para Android:**
+  - Abre el archivo `android/app/src/main/AndroidManifest.xml`.
+  - Dentro del elemento `<application>`, agrega:
+    ```xml
+    <meta-data
+        android:name="com.google.android.geo.API_KEY"
+        android:value="TU_API_KEY_AQUI"/>
+    ```
+- [-] **(Opcional) Configurar para iOS:**
+  - Sigue las indicaciones de [google_maps_flutter](https://pub.dev/packages/google_maps_flutter) para configurar la API Key en iOS, si es que también deseas correr pruebas en esa plataforma.
+  Api Key Web: AIzaSyBhY1hTsmgyp1IS6eNP64J5Kh6DzR21fQw
+
+## 3. Crear la Pantalla del Mapa (UI Principal)
+
+- [x] **Crear un Nuevo Widget para la Pantalla Principal:**
+  - En tu proyecto, crea un archivo nuevo (por ejemplo, `map_screen.dart`) y define un widget llamado `MapScreen`.
+- [x] **Implementar el Widget `GoogleMap`:**
+  - Dentro de `MapScreen`, utiliza el widget `GoogleMap` del paquete `google_maps_flutter`.
+  - Configura la propiedad `initialCameraPosition` con una posición dummy. Por ejemplo, para usar coordenadas de Madrid:
+    ```dart
+    CameraPosition(
+      target: LatLng(40.4168, -3.7038), // Latitud y longitud dummy
+      zoom: 14, // Ajusta el zoom según preferencia
+    )
+    ```
+- [x] **Agregar un Marcador Dummy:**
+  - Define un `Marker` para la posición dummy y así mostrar visualmente la "última ubicación". Ejemplo:
+    ```dart
+    Marker(
+      markerId: MarkerId('lastLocation'),
+      position: LatLng(40.4168, -3.7038),
+      infoWindow: InfoWindow(title: 'Última Ubicación'),
+    )
+    ```
+  - Asegúrate de incluir este marcador en el conjunto de `markers` del `GoogleMap`.
+- [x] **Diseñar el Layout Completo:**
+  - Coloca el `GoogleMap` como elemento principal en la pantalla.
+  
+## 4. Probar la Implementación
+
+- [x] **Ejecutar la App:**
+  - Conecta un dispositivo Android (con depuración USB habilitada) o inicia un emulador.
+  - Desde VS Code, selecciona el dispositivo y corre la app usando `F5` o `flutter run`.
+- [x] **Verificar el Resultado:**
+  - Asegúrate de que el mapa se muestre en pantalla.
+  - Verifica que el marcador aparezca en la posición dummy configurada.
+  
+## 5. Ajustes y Mejoras
+
+- [x] **Optimizar la UI:**
+  - Ajusta el diseño para que el mapa ocupe la mayor parte de la pantalla.
+  - Revisa el overlay o indicador de estado y posiciona correctamente cualquier elemento adicional.
+- [x] **Agregar Retroalimentación:**
+  - Considera incluir mensajes o animaciones para indicar cuando la "última posición" se actualiza (aunque por ahora sea dummy).
+- [x] **Documentar el Código:**
+  - Comenta tu código para futuras referencias, especialmente sobre dónde se está utilizando la posición dummy.
+

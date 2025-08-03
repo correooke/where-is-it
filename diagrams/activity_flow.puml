@@ -1,0 +1,73 @@
+@startuml Activity Flow Diagram
+
+title Diagrama de Flujo de Eventos - WhereIsIt
+
+|Sistema Android|
+start
+fork
+  :Detecta cambio de actividad
+  (Transición IN_VEHICLE);
+  |#AntiqueWhite|ActivityRecognitionProvider|
+  :Procesa la transición;
+  :Envía Intent a TransitionBroadcastReceiver;
+  |#LightBlue|TransitionBroadcastReceiver|
+  :Recibe Intent de transición;
+  :Notifica a los ActivityRecognitionCallbacks registrados;
+  |#LightGreen|ActivityTransitionService|
+  :Recibe notificación de transición;
+  :Pasa evento al ActivityTransitionDetector;
+  |#LightYellow|ActivityTransitionDetector|
+  :Analiza el tipo de transición;
+  :Determina si el usuario está entrando o saliendo del vehículo;
+  :Notifica al ParkingDetector sobre el cambio;
+  |#LightPink|ParkingDetector|
+  :Actualiza estado de "en vehículo";
+  if (Cambio significativo) then
+    :Notifica cambio de estado del vehículo;
+    :Actualiza notificación ("En vehículo");
+  endif
+fork again
+  :Timer del sistema activa
+  verificación periódica (polling);
+  |#AntiqueWhite|ActivityRecognitionProvider|
+  :Solicita actividad actual al sistema;
+  :Envía Intent a PollingBroadcastReceiver;
+  |#LightBlue|PollingBroadcastReceiver|
+  :Recibe Intent con datos de actividad;
+  :Notifica a los ActivityRecognitionCallbacks registrados;
+  |#LightGreen|ActivityTransitionService|
+  :Recibe actividad actual con nivel de confianza;
+  if (Es actividad confirmable AND confianza > 70%) then
+    |#LightPink|ParkingDetector|
+    :Confirma posible estacionamiento;
+    :Marca el vehículo como estacionado;
+    :Notifica cambio de estado de estacionamiento;
+    :Envía broadcast de evento de parking;
+    :Actualiza notificación ("Estacionado");
+  else
+    :Ignora la actividad;
+  endif
+fork again
+  :Detecta cambio
+  en ubicación;
+  |#AntiqueWhite|LocationProvider|
+  :Procesa la ubicación;
+  :Calcula velocidad actual;
+  |#LightGreen|ActivityTransitionService|
+  :Recibe actualización de ubicación;
+  :Determina si está en movimiento (velocidad > STOP_SPEED);
+  :Determina si está conduciendo (velocidad > DRIVING_SPEED);
+  |#LightPink|ParkingDetector|
+  :Actualiza estado de movimiento;
+  if (Cambio a estado "conduciendo") then
+    :Marca el vehículo como no estacionado;
+    :Notifica cambio de estado de estacionamiento;
+    :Envía broadcast de evento de parking;
+    :Actualiza notificación ("Conduciendo");
+  else if (No está en movimiento AND está en vehículo AND no está estacionado) then
+    :Posible estacionamiento detectado (espera confirmación);
+  endif
+end fork
+stop
+
+@enduml 
