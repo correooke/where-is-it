@@ -68,7 +68,8 @@ class _MapScreenState extends State<MapScreen> {
 
   List<Widget> _buildAppBarActions(BuildContext context, MapViewModel model) {
     return [
-      DetectorStatusIndicatorWidget(state: model.detectorState),
+      if (model.isDetectorRunning)
+        DetectorStatusIndicatorWidget(state: model.detectorState),
       IconButton(
         icon: const Icon(Icons.settings),
         tooltip: 'Configuración',
