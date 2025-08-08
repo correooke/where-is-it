@@ -37,10 +37,10 @@ class ActivityTransitionController(
             
             // Update notification based on state
             val message = when (newState) {
-                ParkingState.DRIVING -> "Driving"
-                ParkingState.TENTATIVE_PARKED -> "Possible parking detected"
-                ParkingState.CONFIRMED_PARKED -> "Parked"
-                else -> "Unknown"
+                ParkingState.DRIVING -> "Conduciendo"
+                ParkingState.TENTATIVE_PARKED -> "Posible estacionamiento detectado"
+                ParkingState.CONFIRMED_PARKED -> "Estacionado"
+                else -> "Estado desconocido"
             }
             notificationHandler.updateNotification(message)
             
@@ -62,7 +62,7 @@ class ActivityTransitionController(
     fun start() {
         loggingHandler.debug("Starting ActivityTransitionController")
         notificationHandler.createNotificationChannel()
-        val notif = notificationHandler.createNotification("Monitoring activity...")
+        val notif = notificationHandler.createNotification("Monitoreando actividad...")
         serviceLifecycleManager.startForeground(notif)
 
         // Ubicación - pasar datos crudos al detector

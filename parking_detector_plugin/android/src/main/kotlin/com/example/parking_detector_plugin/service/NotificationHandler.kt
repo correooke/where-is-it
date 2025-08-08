@@ -24,7 +24,7 @@ class NotificationHandlerImpl : KoinComponent, NotificationHandler {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             val channel = NotificationChannel(
                 CHANNEL_ID,
-                "Activity Monitoring",
+                "Monitoreo de actividad",
                 NotificationManager.IMPORTANCE_LOW
             ).apply {
                 description = "Monitorea la actividad del usuario"

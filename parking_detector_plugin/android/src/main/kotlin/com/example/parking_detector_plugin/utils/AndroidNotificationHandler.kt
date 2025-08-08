@@ -21,10 +21,10 @@ class AndroidNotificationHandler(private val context: Context) : NotificationHan
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             val channel = NotificationChannel(
                 CHANNEL_ID,
-                "Parking Detection",
+                "Detección de Estacionamiento",
                 NotificationManager.IMPORTANCE_DEFAULT
             ).apply {
-                description = "Notifications for parking detection service"
+                description = "Notificaciones del servicio de detección de estacionamiento"
             }
             notificationManager.createNotificationChannel(channel)
         }
@@ -32,7 +32,7 @@ class AndroidNotificationHandler(private val context: Context) : NotificationHan
 
     override fun createNotification(message: String): Notification {
         return NotificationCompat.Builder(context, CHANNEL_ID)
-            .setContentTitle("Parking Detection")
+            .setContentTitle("Detección de Estacionamiento")
             .setContentText(message)
             .setSmallIcon(R.drawable.ic_bg_service_small)
             .setPriority(NotificationCompat.PRIORITY_DEFAULT)
