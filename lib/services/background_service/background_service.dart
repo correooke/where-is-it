@@ -41,8 +41,9 @@ Future<void> initializeBackgroundService() async {
       isForegroundMode: false,
       autoStart: true,
       notificationChannelId: channelId,
-      initialNotificationTitle: 'Monitoreo activo',
-      initialNotificationContent: 'Detectando salida del vehículo',
+      // No mostrar como activo hasta que el usuario lo inicie desde la UI
+      initialNotificationTitle: 'Servicio listo',
+      initialNotificationContent: 'Presiona Iniciar para comenzar el monitoreo',
       foregroundServiceNotificationId: 1,
       foregroundServiceTypes: [
         // si monitorizas ubicación

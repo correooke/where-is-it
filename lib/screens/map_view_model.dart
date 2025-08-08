@@ -160,6 +160,8 @@ class MapViewModel extends ChangeNotifier {
     try {
       _backgroundService.invoke(BackgroundServiceCommands.startDetector);
       Logger.logMapViewModel('Solicitud de inicio de detector enviada');
+      _isDetectorRunning = true;
+      notifyListeners();
     } catch (e) {
       Logger.logMapViewModelError('Error iniciando detector', e);
     }
@@ -169,6 +171,8 @@ class MapViewModel extends ChangeNotifier {
     try {
       _backgroundService.invoke(BackgroundServiceCommands.stopDetector);
       Logger.logMapViewModel('Solicitud de detención de detector enviada');
+      _isDetectorRunning = false;
+      notifyListeners();
     } catch (e) {
       Logger.logMapViewModelError('Error deteniendo detector', e);
     }

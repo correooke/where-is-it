@@ -105,7 +105,8 @@ class _MapScreenState extends State<MapScreen> {
     final isRunning = model.isDetectorRunning;
     return FloatingActionButton(
       heroTag: 'btnPlayStop',
-      backgroundColor: isRunning ? Colors.red : Colors.green,
+      // Mostrar estado "stop" al inicio (no corriendo) y cambiar al activarse
+      backgroundColor: isRunning ? Colors.green : Colors.red,
       tooltip: isRunning ? 'Detener monitoreo' : 'Iniciar monitoreo',
       onPressed: () async {
         if (isRunning) {
@@ -114,7 +115,8 @@ class _MapScreenState extends State<MapScreen> {
           await model.startDetector();
         }
       },
-      child: Icon(isRunning ? Icons.stop : Icons.play_arrow),
+      // Icono invertido: al inicio (no corriendo) mostrar stop
+      child: Icon(isRunning ? Icons.play_arrow : Icons.stop),
     );
   }
 
