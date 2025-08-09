@@ -9,6 +9,7 @@ import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'background_service_events.dart';
 import 'background_service_protocol.dart';
 import 'handlers.dart';
+import 'remote_logger.dart';
 
 const channelId = 'where_is_it_channel';
 const channelName = 'Servicio de estacionamiento';
@@ -111,6 +112,8 @@ Future<void> onBackgroundServiceStart(ServiceInstance service) async {
     onLog: (message) {
       // Emitir logs hacia la UI (puede filtrarse en UI por kDebugMode)
       service.invoke(BackgroundServiceEvents.onLog, {'message': message});
+      // Enviar también a un colector remoto si está habilitado
+      RemoteLogger.send(message, level: 'INFO');
     },
   );
 

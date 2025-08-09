@@ -38,6 +38,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
       _subscriptions.add(_listenRaw(BackgroundServiceEvents.onStrategyChanged));
       _subscriptions.add(_listenRaw(BackgroundServiceEvents.onCarExit));
       _subscriptions.add(_listenCurrentStateResponses());
+      _subscriptions.add(_listenLogs());
       // Solicitar estado actual al abrir
       _backgroundService.invoke(BackgroundServiceCommands.getCurrentState);
     }
@@ -67,25 +68,50 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
   // Escucha respuestas de getCurrentState
   StreamSubscription _listenCurrentStateResponses() {
-    return _backgroundService.on(BackgroundServiceEvents.onCurrentState).listen(
-      (event) {
-        if (!kDebugMode) return;
-        if (!_captureEnabled) return;
-        if (!mounted) return;
-        setState(() {
-          _rawEvents.insert(
-            0,
-            _formatEvent(BackgroundServiceEvents.onCurrentState, event),
-          );
-          if (event is Map && (event as Map).containsKey('stateName')) {
-            final map = event as Map;
-            final dynamic stateVal = map['stateName'];
-            _currentDetectorState =
-                stateVal?.toString() ?? _currentDetectorState;
-          }
+    // La respuesta llega en el mismo nombre de evento que el comando
+    return _backgroundService
+        .on(BackgroundServiceCommands.getCurrentState)
+        .listen((event) {
+          if (!kDebugMode) return;
+          if (!_captureEnabled) return;
+          if (!mounted) return;
+          setState(() {
+            _rawEvents.insert(
+              0,
+              _formatEvent(BackgroundServiceCommands.getCurrentState, event),
+            );
+            if (event is Map && (event as Map).containsKey('stateName')) {
+              final map = event as Map;
+              final dynamic stateVal = map['stateName'];
+              _currentDetectorState =
+                  stateVal?.toString() ?? _currentDetectorState;
+            }
+          });
         });
-      },
-    );
+  }
+
+  StreamSubscription _listenLogs() {
+    return _backgroundService.on(BackgroundServiceEvents.onLog).listen((event) {
+      if (!kDebugMode) return;
+      if (!_captureEnabled) return;
+      if (!mounted) return;
+      setState(() {
+        String msg;
+        if (event is Map && (event as Map).containsKey('message')) {
+          final map = event as Map;
+          msg = map['message']?.toString() ?? event.toString();
+        } else {
+          msg = event.toString();
+        }
+        _rawEvents.insert(
+          0,
+          _formatEvent(BackgroundServiceEvents.onLog, {'message': msg}),
+        );
+        if (_rawEvents.length > 100) {
+          _rawEvents.removeLast();
+        }
+      });
+    });
   }
 
   String _formatEvent(String name, dynamic data) {

@@ -51,6 +51,9 @@ dependencies:
   # Almacenamiento local
   shared_preferences: ^2.2.2
 
+  # HTTP para logging remoto
+  http: ^1.2.2
+
   # Agrego Sembast y dependencias para base de datos ligera
   sembast: ^3.1.1
   path_provider: ^2.0.14
