@@ -37,6 +37,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
       _subscriptions.add(_listenRaw(BackgroundServiceEvents.onStateChanged));
       _subscriptions.add(_listenRaw(BackgroundServiceEvents.onStrategyChanged));
       _subscriptions.add(_listenRaw(BackgroundServiceEvents.onCarExit));
+      _subscriptions.add(_listenRaw(BackgroundServiceEvents.onActivityUpdate));
       _subscriptions.add(_listenCurrentStateResponses());
       _subscriptions.add(_listenLogs());
       // Solicitar estado actual al abrir

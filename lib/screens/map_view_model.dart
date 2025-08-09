@@ -47,6 +47,16 @@ class MapViewModel extends ChangeNotifier {
         .on(BackgroundServiceEvents.onStateChanged)
         .listen((event) {
           if (event != null) {
+            // Validar payload esperado { newState, oldState }
+            final hasNewState =
+                event.containsKey('newState') && event['newState'] is String;
+            final hasOldState =
+                event.containsKey('oldState') && event['oldState'] is String;
+            if (!hasNewState || !hasOldState) {
+              // Ignorar eventos malformados (p.ej., actividad cruda)
+              return;
+            }
+
             final stateEvent = CarExitStateChangedEvent.fromJson(event);
             final newState = CarExitState.values.firstWhere(
               (state) => state.toString() == stateEvent.newState,

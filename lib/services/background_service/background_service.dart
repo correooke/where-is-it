@@ -72,13 +72,8 @@ Future<void> onBackgroundServiceStart(ServiceInstance service) async {
 
   // Beacon removido
 
-  // Suscribir al stream de actividad con el nuevo plugin
+  // Suscribir al stream de actividad solo para debug (NO emitir onStateChanged aquí)
   FlutterActivityRecognition.instance.activityStream.listen((activity) {
-    service.invoke(BackgroundServiceEvents.onStateChanged, {
-      'activity': activity.type.toString(),
-      'confidence': activity.confidence.index,
-    });
-    // Emitir también evento de actividad crudo para depuración
     service.invoke(BackgroundServiceEvents.onActivityUpdate, {
       'type': activity.type.toString(),
       'confidence': activity.confidence.index,
