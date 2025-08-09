@@ -6,7 +6,6 @@ import '../widgets/map_view.dart';
 // import '../widgets/native_detector_debug_panel.dart';
 import 'settings_screen.dart';
 import 'map_view_model.dart';
-import '../domain/repositories/beacon_repository.dart';
 
 class MapScreen extends StatefulWidget {
   const MapScreen({super.key});
@@ -123,18 +122,9 @@ class _MapScreenState extends State<MapScreen> {
 
   void _navigateToSettings(BuildContext context) async {
     final viewModel = Provider.of<MapViewModel>(context, listen: false);
-    // Obtener el repositorio de beacon del Provider
-    final beaconRepository = Provider.of<BeaconRepository>(
-      context,
-      listen: false,
-    );
-
     await Navigator.push(
       context,
-      MaterialPageRoute(
-        builder:
-            (context) => SettingsScreen(beaconRepository: beaconRepository),
-      ),
+      MaterialPageRoute(builder: (context) => const SettingsScreen()),
     );
 
     if (mounted) {

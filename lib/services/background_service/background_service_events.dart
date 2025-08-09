@@ -3,20 +3,8 @@ class BackgroundServiceCommands {
   /// Solicita detener el servicio en segundo plano
   static const String stopService = 'stopService';
 
-  /// Solicita asociar un beacon específico al vehículo
-  static const String associateBeacon = 'associateBeacon';
-
-  /// Solicita desasociar el beacon actual del vehículo
-  static const String dissociateBeacon = 'dissociateBeacon';
-
-  /// Solicita obtener el ID del beacon actualmente asociado
-  static const String getAssociatedBeacon = 'getAssociatedBeacon';
-
   /// Solicita información sobre la estrategia de detección activa
   static const String getActiveStrategy = 'getActiveStrategy';
-
-  /// Solicita reevaluar y posiblemente cambiar la estrategia de detección
-  static const String reevaluateStrategies = 'reevaluateStrategies';
 
   /// Solicita obtener el estado actual del detector de salida
   static const String getCurrentState = 'getCurrentState';
@@ -40,12 +28,6 @@ class BackgroundServiceEvents {
 
   /// Notifica que ha cambiado la estrategia de detección activa
   static const String onStrategyChanged = 'onStrategyChanged';
-
-  /// Responde con información del beacon asociado actualmente
-  static const String onAssociatedBeacon = 'onAssociatedBeacon';
-
-  /// Notifica que el beacon ha sido desasociado con éxito
-  static const String onBeaconDissociated = 'onBeaconDissociated';
 
   /// Responde con el estado actual del detector
   static const String onCurrentState = 'onCurrentState';

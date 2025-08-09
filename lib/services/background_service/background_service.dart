@@ -1,10 +1,10 @@
 import 'dart:async';
 import 'package:flutter_background_service/flutter_background_service.dart';
 import 'package:where_is_it/application/services/car_exit_strategy/index.dart';
-import 'package:where_is_it/infrastructure/repositories/beacon_repository_impl.dart';
+// Beacon removido
 import 'package:flutter_activity_recognition/flutter_activity_recognition.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
-import 'package:where_is_it/application/services/beacon_service.dart';
+// Beacon removido
 
 import 'background_service_events.dart';
 import 'background_service_protocol.dart';
@@ -67,8 +67,7 @@ Future<void> onBackgroundServiceStart(ServiceInstance service) async {
     service.setAsForegroundService();
   }
 
-  // BeaconService for persistence operations
-  final beaconService = BeaconService(BeaconRepositoryImpl());
+  // Beacon removido
 
   // Suscribir al stream de actividad con el nuevo plugin
   FlutterActivityRecognition.instance.activityStream.listen((activity) {
@@ -80,10 +79,7 @@ Future<void> onBackgroundServiceStart(ServiceInstance service) async {
 
   // Create detector with proper callbacks
   final CarExitDetector detector = CarExitDetector(
-    strategies: [
-      ActivityBasedDetectionStrategy(),
-      BeaconDetectionStrategy(beaconRepository: BeaconRepositoryImpl()),
-    ],
+    strategies: [ActivityBasedDetectionStrategy()],
     onStateChanged: (newState, oldState) {
       service.invoke(
         BackgroundServiceEvents.onStateChanged,
@@ -115,7 +111,7 @@ Future<void> onBackgroundServiceStart(ServiceInstance service) async {
   );
 
   // Registrar todos los handlers de eventos del servicio
-  _registerEventHandlers(service, detector, beaconService);
+  _registerEventHandlers(service, detector);
 
   // El monitoreo se inicia manualmente desde la UI (por evento)
 
@@ -138,13 +134,9 @@ bool onIosBackground(ServiceInstance service) {
 }
 
 /// Registra todos los handlers de eventos del servicio en segundo plano.
-void _registerEventHandlers(
-  ServiceInstance service,
-  CarExitDetector detector,
-  BeaconService beaconService,
-) {
+void _registerEventHandlers(ServiceInstance service, CarExitDetector detector) {
   // Registrar handlers de comandos
-  _registerCommandHandlers(service, detector, beaconService);
+  _registerCommandHandlers(service, detector);
 
   // Registrar handlers de eventos
   _registerEventHandlerHandlers(service, detector);
@@ -154,7 +146,6 @@ void _registerEventHandlers(
 void _registerCommandHandlers(
   ServiceInstance service,
   CarExitDetector detector,
-  BeaconService beaconService,
 ) {
   // ===== Handlers de control del detector =====
 
@@ -170,55 +161,7 @@ void _registerCommandHandlers(
     return {'status': 'stopped'};
   });
 
-  // ===== Handlers de gestión de beacons =====
-
-  // Handle getAssociatedBeacon command from UI
-  handleServiceCommand<String?>(
-    service,
-    BackgroundServiceCommands.getAssociatedBeacon,
-    (_) async => await beaconService.getAssociatedBeaconId(),
-    BackgroundServiceEvents.onAssociatedBeacon,
-    (id) =>
-        AssociatedBeaconEvent(
-          beaconId: id ?? '',
-          deviceName:
-              'Dispositivo asociado', // Valor por defecto para consultas
-        ).toJson(),
-  );
-
-  // Handle associateBeacon command from UI
-  handleServiceCommand<Map<String, dynamic>>(
-    service,
-    BackgroundServiceCommands.associateBeacon,
-    (payload) async {
-      final id = payload?['beaconId'] as String;
-      final deviceName =
-          payload?['deviceName'] as String? ?? 'Dispositivo desconocido';
-      final fingerprint = payload?['fingerprint'] as Map<String, dynamic>?;
-      await beaconService.associateBeacon(id, fingerprint: fingerprint);
-      await detector.changeStrategy();
-      return {'beaconId': id, 'deviceName': deviceName};
-    },
-    BackgroundServiceEvents.onAssociatedBeacon,
-    (result) =>
-        AssociatedBeaconEvent(
-          beaconId: result['beaconId'] as String,
-          deviceName: result['deviceName'] as String,
-        ).toJson(),
-  );
-
-  // Handle dissociateBeacon command from UI
-  handleServiceCommand<void>(
-    service,
-    BackgroundServiceCommands.dissociateBeacon,
-    (_) async {
-      await beaconService.dissociateBeacon();
-      await detector.changeStrategy();
-      return;
-    },
-    BackgroundServiceEvents.onBeaconDissociated,
-    (_) => {},
-  );
+  // Handlers de gestión de beacons eliminados
 
   // ===== Handlers de consulta de estado =====
 

@@ -10,7 +10,7 @@ import 'package:flutter/material.dart';
 /// - ActiveStrategyCard: Se usa en SettingsScreen, es más grande y detallado
 /// - StrategyIndicator: Se usa en MapScreen, es compacto y discreto
 ///
-/// Ejemplo de uso: Muestra "Actividad" o "Beacon" en un indicador pequeño sobre el mapa
+/// Ejemplo de uso: Muestra "Actividad" en un indicador pequeño sobre el mapa
 class StrategyIndicator extends StatelessWidget {
   final String strategyName;
 

@@ -78,42 +78,6 @@ class ActiveStrategyEvent {
   }
 }
 
-/// Representa el evento de reevaluación de estrategias
-class ReevaluatedEvent {
-  final String strategy;
-
-  ReevaluatedEvent({required this.strategy});
-
-  Map<String, dynamic> toJson() => {'strategy': strategy};
-
-  factory ReevaluatedEvent.fromJson(Map<String, dynamic> json) {
-    return ReevaluatedEvent(strategy: json['strategy'] as String);
-  }
-}
-
-/// Evento que representa un beacon asociado al vehículo.
-class AssociatedBeaconEvent {
-  final String beaconId;
-  final String deviceName;
-
-  AssociatedBeaconEvent({
-    required this.beaconId,
-    this.deviceName = 'Dispositivo desconocido',
-  });
-
-  Map<String, dynamic> toJson() => {
-    'beaconId': beaconId,
-    'deviceName': deviceName,
-  };
-
-  factory AssociatedBeaconEvent.fromJson(Map<String, dynamic> json) {
-    return AssociatedBeaconEvent(
-      beaconId: json['beaconId'] as String,
-      deviceName: json['deviceName'] as String? ?? 'Dispositivo desconocido',
-    );
-  }
-}
-
 /// Representa el evento de consulta del estado actual del detector
 class CurrentStateEvent {
   final String stateName;

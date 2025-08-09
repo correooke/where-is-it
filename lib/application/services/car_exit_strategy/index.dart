@@ -4,6 +4,5 @@
 export 'car_exit_detector.dart';
 export 'car_exit_detection_strategy.dart';
 export 'activity_based_detection_strategy.dart';
-export 'beacon_detection_strategy.dart';
 export 'car_exit_state.dart';
 export 'location_info.dart';
