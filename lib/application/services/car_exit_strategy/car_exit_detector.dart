@@ -24,6 +24,9 @@ typedef StrategyChangeCallback =
       CarExitDetectionStrategy? oldStrategy,
     );
 
+/// Callback para registrar mensajes de log del detector
+typedef LogCallback = void Function(String message);
+
 /// Clase principal para la detección de salida del vehículo utilizando el patrón Strategy.
 class CarExitDetector {
   final BuildContext? context;
@@ -31,6 +34,7 @@ class CarExitDetector {
   final StateChangeCallback? onStateChanged;
   final ErrorCallback? onError;
   final StrategyChangeCallback? onStrategyChanged;
+  final LogCallback? onLog;
 
   // Historial de ubicaciones compartido entre estrategias
   final int _maxLocationHistorySize;
@@ -71,6 +75,7 @@ class CarExitDetector {
     this.onStateChanged,
     this.onError,
     this.onStrategyChanged,
+    this.onLog,
     int maxLocationHistorySize = 50,
   }) : _strategies = strategies,
        _maxLocationHistorySize = maxLocationHistorySize {
@@ -221,8 +226,8 @@ class CarExitDetector {
 
     // Actualizar el estado actual según la nueva estrategia
     final oldState = _currentState;
-    // Usar el estado inicial de la estrategia o mantener el desconocido
-    final newState = newStrategy.getCurrentState() ?? CarExitState.unknown;
+    // Usar el estado inicial de la estrategia; si no informa, usar unknown
+    final CarExitState newState = newStrategy.getCurrentState();
 
     if (newState != oldState) {
       _logMessage(
@@ -271,6 +276,9 @@ class CarExitDetector {
   /// Registra mensajes de log
   void _logMessage(String message) {
     dev.log(message, name: 'CarExitDetector');
+    try {
+      onLog?.call(message);
+    } catch (_) {}
   }
 
   /// Inicia el monitoreo manualmente

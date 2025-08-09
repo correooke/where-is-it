@@ -108,6 +108,10 @@ Future<void> onBackgroundServiceStart(ServiceInstance service) async {
         ).toJson(),
       );
     },
+    onLog: (message) {
+      // Emitir logs hacia la UI (puede filtrarse en UI por kDebugMode)
+      service.invoke(BackgroundServiceEvents.onLog, {'message': message});
+    },
   );
 
   // Registrar todos los handlers de eventos del servicio

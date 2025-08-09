@@ -31,4 +31,7 @@ class BackgroundServiceEvents {
 
   /// Responde con el estado actual del detector
   static const String onCurrentState = 'onCurrentState';
+
+  /// Emite logs del servicio/detector (solo desarrollo)
+  static const String onLog = 'onLog';
 }

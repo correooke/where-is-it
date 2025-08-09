@@ -56,7 +56,6 @@ class _MapScreenState extends State<MapScreen> {
           bottom: 16,
           child: StrategyIndicator(strategyName: model.activeStrategyName),
         ),
-        // const NativeDetectorDebugPanel(),
       ],
     );
   }
