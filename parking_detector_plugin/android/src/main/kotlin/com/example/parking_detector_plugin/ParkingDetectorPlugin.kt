@@ -78,6 +78,17 @@ class ParkingDetectorPlugin: FlutterPlugin, MethodCallHandler, EventChannel.Stre
         context.stopService(intent)
         result.success(true)
       }
+      "emitTestEvent" -> {
+        Log.d("ParkingDetectorPlugin", "emitTestEvent called")
+        // Enviar un evento de prueba con estado CONFIRMED_PARKED
+        try {
+          sendParkingStateEvent(ParkingState.CONFIRMED_PARKED)
+          result.success(true)
+        } catch (e: Exception) {
+          Log.e("ParkingDetectorPlugin", "Error emitting test event", e)
+          result.error("EMIT_ERROR", e.message, null)
+        }
+      }
       "getCurrentState" -> {
         Log.d("ParkingDetectorPlugin", "getCurrentState called")
         val state = ParkingDetectionService.getCurrentState()?.name ?: "UNKNOWN"
@@ -97,10 +108,15 @@ class ParkingDetectorPlugin: FlutterPlugin, MethodCallHandler, EventChannel.Stre
       "state" to state.name,
       "timestamp" to System.currentTimeMillis()
     )
-    
-    // Enviar evento a Flutter en el hilo principal
-    activity?.runOnUiThread {
-      eventSink?.success(stateMap)
+
+    // Enviar evento a Flutter en el hilo principal sin depender de Activity
+    val mainHandler = android.os.Handler(android.os.Looper.getMainLooper())
+    mainHandler.post {
+      try {
+        eventSink?.success(stateMap)
+      } catch (e: Exception) {
+        Log.e("ParkingDetectorPlugin", "Error sending event to Flutter", e)
+      }
     }
   }
 

@@ -3,6 +3,7 @@ import 'package:flutter_background_service/flutter_background_service.dart';
 import 'package:where_is_it/application/services/car_exit_strategy/index.dart';
 // Beacon removido
 import 'package:flutter_activity_recognition/flutter_activity_recognition.dart';
+// Registrador explícito innecesario en versiones modernas; mantener simple
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 // Beacon removido
 
@@ -63,6 +64,7 @@ Future<void> initializeBackgroundService() async {
 /// Callback que corre en un isolate separado y mantiene activa la detección.
 @pragma('vm:entry-point')
 Future<void> onBackgroundServiceStart(ServiceInstance service) async {
+  // Asegurar foreground y continuar
   // Make sure the service runs in foreground after start
   if (service is AndroidServiceInstance) {
     service.setAsForegroundService();
@@ -76,11 +78,23 @@ Future<void> onBackgroundServiceStart(ServiceInstance service) async {
       'activity': activity.type.toString(),
       'confidence': activity.confidence.index,
     });
+    // Emitir también evento de actividad crudo para depuración
+    service.invoke(BackgroundServiceEvents.onActivityUpdate, {
+      'type': activity.type.toString(),
+      'confidence': activity.confidence.index,
+      'ts': DateTime.now().millisecondsSinceEpoch,
+    });
   });
 
   // Create detector with proper callbacks
   final CarExitDetector detector = CarExitDetector(
-    strategies: [ActivityBasedDetectionStrategy()],
+    strategies: [
+      ActivityBasedDetectionStrategy(
+        onCarExitDetected: (loc) {
+          // Propagar a detector superior a través de onCarExitDetected ya definido
+        },
+      ),
+    ],
     onStateChanged: (newState, oldState) {
       service.invoke(
         BackgroundServiceEvents.onStateChanged,
@@ -88,6 +102,11 @@ Future<void> onBackgroundServiceStart(ServiceInstance service) async {
           newState: newState.toString(),
           oldState: oldState.toString(),
         ).toJson(),
+      );
+      RemoteLogger.send(
+        'Estado detector cambiado: $oldState -> $newState',
+        level: 'INFO',
+        context: {'event': 'onStateChanged'},
       );
     },
     onCarExitDetected: (exitLocation) {
@@ -99,6 +118,16 @@ Future<void> onBackgroundServiceStart(ServiceInstance service) async {
           timestamp: exitLocation.timestamp.millisecondsSinceEpoch,
         ).toJson(),
       );
+      RemoteLogger.send(
+        'Salida detectada @ ${exitLocation.latitude}, ${exitLocation.longitude}',
+        level: 'INFO',
+        context: {
+          'event': 'onCarExit',
+          'lat': exitLocation.latitude,
+          'lng': exitLocation.longitude,
+          'ts': exitLocation.timestamp.millisecondsSinceEpoch,
+        },
+      );
     },
     onStrategyChanged: (newStrategy, oldStrategy) {
       service.invoke(
@@ -107,6 +136,11 @@ Future<void> onBackgroundServiceStart(ServiceInstance service) async {
           newStrategy: newStrategy?.runtimeType.toString() ?? 'none',
           oldStrategy: oldStrategy?.runtimeType.toString() ?? 'none',
         ).toJson(),
+      );
+      RemoteLogger.send(
+        'Estrategia cambiada: ${oldStrategy?.runtimeType} -> ${newStrategy?.runtimeType}',
+        level: 'INFO',
+        context: {'event': 'onStrategyChanged'},
       );
     },
     onLog: (message) {
@@ -119,6 +153,13 @@ Future<void> onBackgroundServiceStart(ServiceInstance service) async {
 
   // Registrar todos los handlers de eventos del servicio
   _registerEventHandlers(service, detector);
+
+  // Ping de verificación al iniciar servicio
+  RemoteLogger.send(
+    'Servicio de fondo iniciado',
+    level: 'INFO',
+    context: {'event': 'service_start'},
+  );
 
   // El monitoreo se inicia manualmente desde la UI (por evento)
 

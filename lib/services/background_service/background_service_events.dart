@@ -34,4 +34,7 @@ class BackgroundServiceEvents {
 
   /// Emite logs del servicio/detector (solo desarrollo)
   static const String onLog = 'onLog';
+
+  /// Actualizaciones crudas de Activity Recognition (solo debug)
+  static const String onActivityUpdate = 'onActivityUpdate';
 }

@@ -22,4 +22,9 @@ class ParkingDetectorPlugin {
 
   static Stream<dynamic> get parkingEvents =>
       _eventChannel.receiveBroadcastStream();
+
+  /// Emite un evento de prueba desde el plugin nativo (para diagnóstico)
+  static Future<bool> emitTestEvent() async {
+    return await _channel.invokeMethod('emitTestEvent');
+  }
 }

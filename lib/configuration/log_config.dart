@@ -9,14 +9,16 @@ class LogConfig {
   /// Para Logtail: https://in.logtail.com
   static const String endpoint = String.fromEnvironment(
     'LOG_ENDPOINT',
-    defaultValue: 'https://in.logtail.com',
+    // Host de ingestión provisto: Better Stack Telemetry (HTTP)
+    defaultValue: 'https://s1471639.eu-nbg-2.betterstackdata.com',
   );
 
   /// Token/API key para autenticación con el colector
   /// Para Logtail usar el Source Token
   static const String apiKey = String.fromEnvironment(
     'LOG_API_KEY',
-    defaultValue: '', // Rellena con tu token de fuente (solo en dev)
+    // No hardcodear secretos. Definir por --dart-define o variables de entorno.
+    defaultValue: '',
   );
 
   /// Nombre de la app para etiquetar los eventos

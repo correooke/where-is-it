@@ -1,5 +1,4 @@
 import 'dart:async';
-// import 'package:flutter/services.dart';
 import 'car_exit_detection_strategy.dart';
 import 'car_exit_state.dart';
 import 'location_info.dart';
@@ -8,7 +7,7 @@ import 'package:parking_detector_plugin/parking_detector_plugin.dart';
 
 /// Estrategia de detección basada en el reconocimiento de actividad nativo (Kotlin).
 class ActivityBasedDetectionStrategy extends CarExitDetectionStrategy {
-  // Suscripción al stream de eventos
+  // Suscripción al stream del plugin nativo
   StreamSubscription<dynamic>? _parkingStateSubscription;
 
   // Estado actual del detector
@@ -38,7 +37,7 @@ class ActivityBasedDetectionStrategy extends CarExitDetectionStrategy {
     super.priority = 10, // Prioridad media-alta por defecto
   });
 
-  /// Mapeo de estados de ParkingState (Kotlin) a CarExitState (Dart)
+  /// Mapea estado del plugin a estado interno
   CarExitState _mapNativeStateToCarExitState(String nativeState) {
     switch (nativeState) {
       case 'DRIVING':
@@ -55,7 +54,7 @@ class ActivityBasedDetectionStrategy extends CarExitDetectionStrategy {
 
   @override
   Future<bool> checkAvailability() async {
-    // Verificar si el servicio nativo está disponible
+    // Verificar respuesta del plugin nativo
     try {
       await ParkingDetectorPlugin.getCurrentState();
       return true;
@@ -72,7 +71,7 @@ class ActivityBasedDetectionStrategy extends CarExitDetectionStrategy {
         'ActivityBasedDetectionStrategy: initializeStrategy() start',
       );
 
-      // Suscribirse al stream de eventos de estado
+      // Suscribirse a eventos del plugin
       _parkingStateSubscription = ParkingDetectorPlugin.parkingEvents.listen(
         _handleParkingStateEvent,
         onError: (error) {
@@ -80,6 +79,7 @@ class ActivityBasedDetectionStrategy extends CarExitDetectionStrategy {
             'Error receiving parking state events',
             error,
           );
+          _handleError('Error recibiendo eventos del detector', error);
         },
       );
 
@@ -88,9 +88,8 @@ class ActivityBasedDetectionStrategy extends CarExitDetectionStrategy {
 
       // Estado inicial
       _changeState(CarExitState.unknown);
-
       Logger.logDetectionStrategy(
-        'ActivityBased: monitor started. Initial state: $_currentState, success: $success',
+        'ActivityBased: monitor started (plugin). Initial state: $_currentState, success: $success',
       );
       return success;
     } catch (e) {
@@ -102,35 +101,27 @@ class ActivityBasedDetectionStrategy extends CarExitDetectionStrategy {
     }
   }
 
-  /// Maneja eventos de estado recibidos desde el código nativo
   void _handleParkingStateEvent(dynamic event) {
     if (event is! Map) {
       Logger.logDetectionStrategy('Received invalid event format: $event');
       return;
     }
-
     final String? stateStr = event['state'] as String?;
     if (stateStr == null) {
       Logger.logDetectionStrategy('Received event without state: $event');
       return;
     }
-
     final CarExitState newState = _mapNativeStateToCarExitState(stateStr);
     Logger.logDetectionStrategy(
       'Received native state: $stateStr -> $newState',
     );
-
-    // Cambiar estado según el evento recibido
     _changeState(newState);
   }
 
   @override
   void dispose() {
     try {
-      // Detener el servicio nativo
       ParkingDetectorPlugin.stopParkingDetection();
-
-      // Cancelar suscripción a eventos
       _parkingStateSubscription?.cancel();
       _parkingStateSubscription = null;
 
@@ -187,8 +178,6 @@ class ActivityBasedDetectionStrategy extends CarExitDetectionStrategy {
     _lastKnownLocation = null;
     _enteredStoppedStateTime = null;
     Logger.logDetectionStrategy('Estrategia reiniciada');
-
-    // Forzar reinicio del servicio nativo
     ParkingDetectorPlugin.stopParkingDetection()
         .then((_) => ParkingDetectorPlugin.startParkingDetection())
         .catchError((e) => _handleError('Error al reiniciar el servicio', e));
@@ -245,6 +234,12 @@ class ActivityBasedDetectionStrategy extends CarExitDetectionStrategy {
     final errorMsg =
         "$message: ${error != null ? error.toString() : 'sin detalles'}";
     Logger.logDetectionStrategyError(errorMsg);
+    try {
+      onError?.call(message, error);
+    } catch (_) {}
+    try {
+      onLog?.call(errorMsg);
+    } catch (_) {}
   }
 
   @override

@@ -14,6 +14,9 @@ abstract class CarExitDetectionStrategy {
   /// Callback para notificar errores
   void Function(String message, Object? error)? onError;
 
+  /// Callback de log (opcional) para propagar mensajes hacia capas superiores
+  void Function(String message)? onLog;
+
   /// Contexto de la aplicación, puede ser necesario para algunas implementaciones
   final BuildContext? context;
 
