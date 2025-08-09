@@ -28,11 +28,7 @@ class _MapScreenState extends State<MapScreen> {
       floatingActionButton: Column(
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.end,
-        children: [
-          _buildPlayStopButton(context, model),
-          const SizedBox(height: 12),
-          _buildLocationButton(context),
-        ],
+        children: [_buildPlayStopButton(context, model)],
       ),
     );
   }
@@ -75,30 +71,6 @@ class _MapScreenState extends State<MapScreen> {
         onPressed: () => _navigateToSettings(context),
       ),
     ];
-  }
-
-  Widget _buildLocationButton(BuildContext context) {
-    return FloatingActionButton(
-      heroTag: 'btn1',
-      child: const Icon(Icons.my_location),
-      onPressed: () async {
-        final model = Provider.of<MapViewModel>(context, listen: false);
-        final scaffoldMessenger = ScaffoldMessenger.of(context);
-
-        try {
-          await model.loadInitialData();
-        } catch (e) {
-          if (mounted) {
-            scaffoldMessenger.showSnackBar(
-              SnackBar(
-                content: Text('Error al obtener la ubicación: $e'),
-                backgroundColor: Colors.red,
-              ),
-            );
-          }
-        }
-      },
-    );
   }
 
   Widget _buildPlayStopButton(BuildContext context, MapViewModel model) {

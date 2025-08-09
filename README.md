@@ -1,6 +1,6 @@
 # Where Is It
 
-Una aplicación Flutter que permite a los usuarios localizar su vehículo utilizando tecnología Bluetooth y GPS. La aplicación detecta automáticamente cuando el usuario se aleja del vehículo y guarda la ubicación, permitiendo al usuario encontrarlo posteriormente.
+Una aplicación Flutter que permite a los usuarios localizar su vehículo utilizando GPS y reconocimiento de actividad. La aplicación detecta automáticamente cuando el usuario ha salido del vehículo y guarda la ubicación, permitiendo al usuario encontrarlo posteriormente.
 
 ## Arquitectura
 
@@ -31,7 +31,6 @@ lib/
 │       │   ├── car_exit_detector.dart
 │       │   ├── car_exit_detection_strategy.dart
 │       │   └── ...             # Implementaciones de estrategias
-│       ├── beacon_service.dart
 │       └── location_service.dart
 ├── screens/             # Capa de presentación
 ├── configuration/       # Configuraciones globales
@@ -80,10 +79,7 @@ Interfaz que define el contrato para las estrategias de detección:
    - Procesa datos de ubicación para determinar velocidad
    - Alta precisión pero mayor consumo de batería
 
-2. **BeaconDetectionStrategy**:
-   - Utiliza beacons Bluetooth para detectar proximidad al vehículo
-   - Calcula distancia aproximada basada en RSSI
-   - Bajo consumo de batería pero requiere hardware adicional
+2. (Eliminada) BeaconDetectionStrategy
 
 ### Máquina de Estados
 
@@ -98,7 +94,7 @@ El sistema utiliza una máquina de estados simple pero efectiva:
 ### Flujo de Detección
 
 1. Al inicializar, se selecciona la mejor estrategia disponible basada en prioridad
-2. La estrategia monitorea actividad/ubicación/beacons según su implementación
+2. La estrategia monitorea actividad/ubicación según su implementación
 3. Al detectar una posible salida, se actualiza el estado y se guarda la ubicación
 4. Se notifica al usuario para que pueda localizar su vehículo posteriormente
 
@@ -120,9 +116,7 @@ El sistema utiliza una máquina de estados simple pero efectiva:
   - Métodos: `getCurrentLocation()`, `saveLocation()`, `loadLastSavedLocation()`
   - Responsabilidad: Definir el contrato para la obtención, guardado y carga de ubicaciones.
 
-- **`BeaconRepository`**: Interfaz para la gestión de beacons Bluetooth.
-  - Métodos: `saveBeaconId()`, `loadBeaconId()`
-  - Responsabilidad: Persistencia de la información de beacons asociados.
+// BeaconRepository eliminado
 
 ### Capa de Infraestructura
 
@@ -151,21 +145,12 @@ El sistema utiliza una máquina de estados simple pero efectiva:
   - Utiliza `activity_recognition_flutter` para detectar cambios de actividad
   - Procesa datos de ubicación para determinar velocidad y detenciones
 
-- **`BeaconDetectionStrategy`**: Implementación basada en beacons Bluetooth.
-
-  - Utiliza `flutter_blue_plus` para escanear dispositivos cercanos
-  - Calcula distancia aproximada basada en RSSI
-
-- **`BeaconService`**: Gestiona operaciones relacionadas con beacons.
-
-  - Métodos: `associateBeacon()`, `getAssociatedBeaconId()`, `dissociateBeacon()`
-  - Responsabilidad: Abstraer operaciones con beacons del repositorio.
+// BeaconDetectionStrategy y BeaconService eliminados
 
 - **`LocationService`**: Coordina operaciones relacionadas con la ubicación.
   - Dependencias: `LocationRepository`
   - Métodos clave:
     - `getCurrentLocation()`: Obtiene la ubicación actual a través del repositorio.
-    - `onExternalTrigger()`: Maneja eventos externos (como la desconexión del Beacon).
     - `saveLocation()`: Guarda una ubicación específica.
     - `loadLastSavedLocation()`: Carga la última ubicación guardada.
   - Responsabilidad: Orquestar la lógica de negocio relacionada con las ubicaciones.
@@ -208,7 +193,7 @@ El sistema utiliza una máquina de estados simple pero efectiva:
 
 La aplicación está diseñada para funcionar tanto en dispositivos móviles como en web:
 
-- **Móvil**: Utiliza `geolocator` para obtener la ubicación precisa y `flutter_blue_plus` para la detección de Beacons Bluetooth.
+- **Móvil**: Utiliza `geolocator` para obtener la ubicación precisa.
 - **Web**: Implementa adaptaciones específicas para Google Maps en web y manejo alternativo de permisos.
 
 ### Organización del Código
@@ -222,10 +207,8 @@ lib/application/services/
 │   ├── car_exit_detector.dart            # Clase base del detector
 │   ├── car_exit_detection_strategy.dart  # Interfaz de estrategia
 │   ├── activity_based_detection_strategy.dart # Estrategia basada en actividad
-│   ├── beacon_detection_strategy.dart    # Estrategia basada en beacons
 │   ├── car_exit_state.dart               # Enumeración de estados
 │   └── location_info.dart                # Clase para representar ubicaciones
-├── beacon_service.dart                   # Servicio relacionado con beacons
 ├── location_service.dart                 # Servicio relacionado con ubicaciones
 └── car_exit_demo.dart                    # Demostración
 ```
@@ -277,7 +260,7 @@ El uso del patrón Strategy para la detección de salida del vehículo aporta va
 
 1. La aplicación inicia y solicita los permisos necesarios.
 2. El detector de salida de vehículo inicializa con la mejor estrategia disponible.
-3. Se monitoriza constantemente la actividad del usuario y/o proximidad a beacons.
+3. Se monitoriza constantemente la actividad del usuario.
 4. Al detectar que el usuario ha salido del vehículo, se guarda automáticamente la ubicación.
 5. El usuario puede visualizar tanto su ubicación actual como la ubicación guardada del vehículo.
 6. El sistema de estado proporciona información sobre el estado actual (conduciendo, detenido, salido).

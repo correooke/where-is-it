@@ -1,4 +1,4 @@
-# Lista de Tareas: Aplicación Flutter con Beacon Bluetooth
+# Lista de Tareas: Aplicación Flutter
 
 ## 1. Configuración del Entorno
 - [x] **Instalar Flutter**  
@@ -27,8 +27,6 @@
 - [x] **Agregar Dependencias en `pubspec.yaml`**  (Es necesario estar como administrador)
     geolocator: ^11.0.0
     google_maps_flutter: ^2.5.3
-    # Paquetes para Bluetooth
-    flutter_blue_plus: ^1.31.16
     # Gestor de permisos
     permission_handler: ^11.3.0
 
@@ -38,18 +36,12 @@
 ## 6. Obtención y Almacenamiento de Ubicación
 - [x] **Integrar el Paquete de Ubicación**  
   Configurar la obtención de la ubicación GPS mediante `geolocator` o `location`.
-- [x] **Obtener la Ubicación al Detectar la Desconexión**  
-  Programar la lógica para solicitar y capturar la ubicación actual cuando se detecte la desconexión del Beacon.
 - [x] **Guardar la Ubicación Localmente**  
   Utilizar almacenamiento local (por ejemplo, SharedPreferences o una base de datos ligera) para persistir la ubicación capturada.
 
-## 5. Integración de Funcionalidades con Beacon Bluetooth
-- [ ] **Configurar el Escaneo de Beacon**  
-  - Inicializar el escaneo de dispositivos Bluetooth.
-  - Detectar el Beacon asociado al automóvil.
-- [ ] **Programar la Lógica de Detección**  
-  - Definir la lógica para detectar la desconexión del Beacon.
-  - Monitorear el nivel de señal (RSSI) para determinar la proximidad y detectar cuando el usuario se aleja.
+## 5. Detección de salida del vehículo (Activity Recognition)
+- [ ] Configurar reconocimiento de actividad
+- [ ] Afinar thresholds para detectar estado de salida
 
 
 ## 7. Visualización de la Ubicación en un Mapa
@@ -61,9 +53,9 @@
   Añadir un botón que permita abrir la ubicación en la app de Google Maps, si se desea.
 
 ## 8. Pruebas y Optimización
-- [ ] **Probar la Funcionalidad del Beacon y Ubicación**  
+- [ ] **Probar la Funcionalidad de Ubicación y Detección por Actividad**  
   - Ejecutar pruebas en dispositivo real y/o emulador.
-  - Verificar la detección correcta del Beacon y captura de la ubicación.
+  - Verificar la detección correcta de salida y captura de la ubicación.
 - [ ] **Optimizar el Consumo de Batería**  
   Revisar y optimizar el uso de sensores y procesos en segundo plano para evitar consumo excesivo.
 
