@@ -26,44 +26,21 @@ class MapViewModel extends ChangeNotifier {
   // Estado de la UI
   bool _isLoading = true;
   bool _isDetectorRunning = false;
+  // Polling deshabilitado temporalmente para validar mensajería directa
   Timer? _statePoller;
 
-  // Suscripción a eventos del plugin nativo
-  StreamSubscription<dynamic>? _pluginSubscription;
+  // Solo polling para estado actual
+  StreamSubscription<dynamic>?
+  _pluginSubscription; // (no usado cuando hay solo polling)
 
   MapViewModel({
     LocationService? locationService,
     PermissionService? permissionService,
   }) : _locationService =
            locationService ?? LocationService(LocationRepositoryImpl()),
-       _permissionService = permissionService ?? PermissionService() {
-    _listenToPluginEvents();
-  }
+       _permissionService = permissionService ?? PermissionService();
 
-  void _listenToPluginEvents() {
-    // Escuchar eventos nativos directamente (main isolate)
-    _pluginSubscription = ParkingDetectorPlugin.parkingEvents.listen((event) {
-      try {
-        if (event is Map && event['state'] is String) {
-          final String stateStr = event['state'] as String;
-          final CarExitState newState = _mapNativeStateToCarExitState(stateStr);
-          if (_detectorState != newState) {
-            _detectorState = newState;
-            Logger.logMapViewModel(
-              'Estado (plugin) actualizado: $_detectorState',
-            );
-            if (newState == CarExitState.exited) {
-              _handleCarExitDetected();
-            }
-            notifyListeners();
-          }
-        }
-      } catch (e) {
-        Logger.logMapViewModelError('Error procesando evento del plugin', e);
-      }
-    });
-  }
-
+  // Mensajería directa deshabilitada; usamos solo polling
   Future<void> _pollCurrentStateOnce() async {
     try {
       final native = await ParkingDetectorPlugin.getCurrentState();
@@ -71,11 +48,12 @@ class MapViewModel extends ChangeNotifier {
       if (_detectorState != mapped) {
         _detectorState = mapped;
         Logger.logMapViewModel('Estado (poll) actualizado: $_detectorState');
+        if (mapped == CarExitState.exited) {
+          await _handleCarExitDetected();
+        }
         notifyListeners();
       }
-    } catch (e) {
-      // Ignorar errores de polling
-    }
+    } catch (_) {}
   }
 
   CarExitState _mapNativeStateToCarExitState(String nativeState) {
@@ -175,7 +153,7 @@ class MapViewModel extends ChangeNotifier {
       await ParkingDetectorPlugin.startParkingDetection();
       Logger.logMapViewModel('Detector nativo iniciado');
       _isDetectorRunning = true;
-      // Poll inicial y programar polling periódico para asegurar sincronía
+      // Iniciar polling del estado
       await _pollCurrentStateOnce();
       _statePoller?.cancel();
       _statePoller = Timer.periodic(const Duration(seconds: 2), (_) {

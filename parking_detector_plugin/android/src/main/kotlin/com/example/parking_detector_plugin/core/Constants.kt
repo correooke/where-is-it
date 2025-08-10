@@ -30,8 +30,10 @@ object Constants {
     const val ACTION_PARKING_DATA = "com.example.where_is_it.PARKING_DATA"
 
     // Umbrales (m/s)
-    const val STOP_SPEED = 0.2f
-    const val DRIVING_SPEED = 1.4f
+    // STOP_SPEED ≈ 0.5 m/s (~1.8 km/h) para tolerar pequeñas variaciones/ruido
+    const val STOP_SPEED = 0.1f
+    // DRIVING_SPEED ≈ 3.5 m/s (~12.6 km/h) por encima de caminar/trote
+    const val DRIVING_SPEED = 0.7f
 
     // Activity detection thresholds
     const val STILL_ACTIVITY = com.google.android.gms.location.DetectedActivity.STILL
