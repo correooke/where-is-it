@@ -27,6 +27,7 @@ class ParkingDetectorPlugin: FlutterPlugin, MethodCallHandler, EventChannel.Stre
   private lateinit var context: Context
   private var activity: Activity? = null
   private var eventSink: EventChannel.EventSink? = null
+  private val pendingEvents: ArrayDeque<Map<String, Any>> = ArrayDeque()
 
   // Static singleton para acceder desde el servicio
   companion object {
@@ -61,6 +62,16 @@ class ParkingDetectorPlugin: FlutterPlugin, MethodCallHandler, EventChannel.Stre
     // Canal para eventos (eventos desde nativo a Flutter)
     eventChannel = EventChannel(flutterPluginBinding.binaryMessenger, "com.example.parking_detector_plugin/parking_events")
     eventChannel.setStreamHandler(this)
+
+    // Emitir estado actual si existe (sticky) para suscriptores tardíos
+    try {
+      val current = com.example.parking_detector_plugin.service.ParkingDetectionService.getCurrentState()?.name
+      if (current != null) {
+        pendingEvents.add(mapOf("state" to current, "timestamp" to System.currentTimeMillis()))
+      }
+    } catch (e: Exception) {
+      Log.e("ParkingDetectorPlugin", "Error queuing sticky state", e)
+    }
   }
 
   override fun onMethodCall(@NonNull call: MethodCall, @NonNull result: Result) {
@@ -109,11 +120,15 @@ class ParkingDetectorPlugin: FlutterPlugin, MethodCallHandler, EventChannel.Stre
       "timestamp" to System.currentTimeMillis()
     )
 
-    // Enviar evento a Flutter en el hilo principal sin depender de Activity
+    // Enviar evento a Flutter en el hilo principal. Si no hay suscriptores aún, bufferizar.
     val mainHandler = android.os.Handler(android.os.Looper.getMainLooper())
     mainHandler.post {
       try {
-        eventSink?.success(stateMap)
+        if (eventSink == null) {
+          pendingEvents.add(stateMap)
+        } else {
+          eventSink?.success(stateMap)
+        }
       } catch (e: Exception) {
         Log.e("ParkingDetectorPlugin", "Error sending event to Flutter", e)
       }
@@ -123,6 +138,15 @@ class ParkingDetectorPlugin: FlutterPlugin, MethodCallHandler, EventChannel.Stre
   override fun onListen(arguments: Any?, events: EventChannel.EventSink?) {
     Log.d("ParkingDetectorPlugin", "onListen called")
     eventSink = events
+    // Drenar eventos pendientes
+    while (pendingEvents.isNotEmpty()) {
+      try {
+        eventSink?.success(pendingEvents.removeFirst())
+      } catch (e: Exception) {
+        Log.e("ParkingDetectorPlugin", "Error draining pending events", e)
+        break
+      }
+    }
   }
 
   override fun onCancel(arguments: Any?) {
@@ -156,4 +180,4 @@ class ParkingDetectorPlugin: FlutterPlugin, MethodCallHandler, EventChannel.Stre
     Log.d("ParkingDetectorPlugin", "onDetachedFromActivity called")
     activity = null
   }
-} 
+}

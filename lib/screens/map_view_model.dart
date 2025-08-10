@@ -4,11 +4,9 @@ import '../application/services/location_service.dart';
 import '../infrastructure/repositories/location_repository_impl.dart';
 import '../application/services/permission_service.dart';
 import 'dart:async';
-import 'package:flutter_background_service/flutter_background_service.dart';
-import '../application/services/car_exit_strategy/car_exit_state.dart';
-import '../services/background_service/background_service_events.dart';
-import '../services/background_service/background_service_protocol.dart';
+import '../application/models/car_exit_state.dart';
 import '../utils/logger.dart';
+import 'package:parking_detector_plugin/parking_detector_plugin.dart';
 
 // MapViewModel actúa como puente entre la UI y la capa de datos,
 // gestionando el estado y la lógica de negocio para la pantalla del mapa.
@@ -16,8 +14,7 @@ class MapViewModel extends ChangeNotifier {
   // Servicios
   final LocationService _locationService;
   final PermissionService _permissionService;
-  final FlutterBackgroundService _backgroundService =
-      FlutterBackgroundService();
+  // Eliminado uso de FlutterBackgroundService; manejamos eventos directo del plugin
 
   // Estado de ubicación
   LatLng? _currentLocation;
@@ -30,8 +27,8 @@ class MapViewModel extends ChangeNotifier {
   bool _isLoading = true;
   bool _isDetectorRunning = false;
 
-  // Suscripción a eventos del servicio
-  StreamSubscription<Map<String, dynamic>?>? _serviceSubscription;
+  // Suscripción a eventos del plugin nativo
+  StreamSubscription<dynamic>? _pluginSubscription;
 
   MapViewModel({
     LocationService? locationService,
@@ -39,50 +36,45 @@ class MapViewModel extends ChangeNotifier {
   }) : _locationService =
            locationService ?? LocationService(LocationRepositoryImpl()),
        _permissionService = permissionService ?? PermissionService() {
-    _listenToServiceEvents();
+    _listenToPluginEvents();
   }
 
-  void _listenToServiceEvents() {
-    _serviceSubscription = _backgroundService
-        .on(BackgroundServiceEvents.onStateChanged)
-        .listen((event) {
-          if (event != null) {
-            // Validar payload esperado { newState, oldState }
-            final hasNewState =
-                event.containsKey('newState') && event['newState'] is String;
-            final hasOldState =
-                event.containsKey('oldState') && event['oldState'] is String;
-            if (!hasNewState || !hasOldState) {
-              // Ignorar eventos malformados (p.ej., actividad cruda)
-              return;
-            }
-
-            final stateEvent = CarExitStateChangedEvent.fromJson(event);
-            final newState = CarExitState.values.firstWhere(
-              (state) => state.toString() == stateEvent.newState,
-              orElse: () => CarExitState.unknown,
+  void _listenToPluginEvents() {
+    // Escuchar eventos nativos directamente (main isolate)
+    _pluginSubscription = ParkingDetectorPlugin.parkingEvents.listen((event) {
+      try {
+        if (event is Map && event['state'] is String) {
+          final String stateStr = event['state'] as String;
+          final CarExitState newState = _mapNativeStateToCarExitState(stateStr);
+          if (_detectorState != newState) {
+            _detectorState = newState;
+            Logger.logMapViewModel(
+              'Estado (plugin) actualizado: $_detectorState',
             );
-
-            if (_detectorState != newState) {
-              _detectorState = newState;
-              Logger.logMapViewModel(
-                'Estado del detector actualizado: $_detectorState',
-              );
-              notifyListeners();
+            if (newState == CarExitState.exited) {
+              _handleCarExitDetected();
             }
+            notifyListeners();
           }
-        });
-
-    _backgroundService.on(BackgroundServiceEvents.onCarExit).listen((event) {
-      if (event != null) {
-        final exitEvent = CarExitDetectedEvent.fromJson(event);
-        _savedLocation = LatLng(exitEvent.latitude, exitEvent.longitude);
-        Logger.logMapViewModel(
-          'Ubicación de estacionamiento guardada: $_savedLocation',
-        );
-        notifyListeners();
+        }
+      } catch (e) {
+        Logger.logMapViewModelError('Error procesando evento del plugin', e);
       }
     });
+  }
+
+  CarExitState _mapNativeStateToCarExitState(String nativeState) {
+    switch (nativeState) {
+      case 'DRIVING':
+        return CarExitState.driving;
+      case 'TENTATIVE_PARKED':
+        return CarExitState.stopped;
+      case 'CONFIRMED_PARKED':
+        return CarExitState.exited;
+      case 'UNKNOWN':
+      default:
+        return CarExitState.unknown;
+    }
   }
 
   LatLng? get currentLocation => _currentLocation;
@@ -154,9 +146,6 @@ class MapViewModel extends ChangeNotifier {
       }
       await Future.wait([_loadSavedLocation(), _loadCurrentLocation()]);
 
-      // Solicitar estado actual del servicio
-      _backgroundService.invoke(BackgroundServiceCommands.getCurrentState);
-
       Logger.logMapViewModel('Carga de datos iniciales completada');
     } catch (e) {
       Logger.logMapViewModelError('Error cargando datos iniciales', e);
@@ -168,8 +157,8 @@ class MapViewModel extends ChangeNotifier {
 
   Future<void> startDetector() async {
     try {
-      _backgroundService.invoke(BackgroundServiceCommands.startDetector);
-      Logger.logMapViewModel('Solicitud de inicio de detector enviada');
+      await ParkingDetectorPlugin.startParkingDetection();
+      Logger.logMapViewModel('Detector nativo iniciado');
       _isDetectorRunning = true;
       notifyListeners();
     } catch (e) {
@@ -179,8 +168,8 @@ class MapViewModel extends ChangeNotifier {
 
   Future<void> stopDetector() async {
     try {
-      _backgroundService.invoke(BackgroundServiceCommands.stopDetector);
-      Logger.logMapViewModel('Solicitud de detención de detector enviada');
+      await ParkingDetectorPlugin.stopParkingDetection();
+      Logger.logMapViewModel('Detector nativo detenido');
       _isDetectorRunning = false;
       notifyListeners();
     } catch (e) {
@@ -188,9 +177,23 @@ class MapViewModel extends ChangeNotifier {
     }
   }
 
+  Future<void> _handleCarExitDetected() async {
+    try {
+      final current = await _locationService.getCurrentLocation();
+      _savedLocation = current;
+      await _locationService.saveLocation(current);
+      Logger.logMapViewModel(
+        'Ubicación de estacionamiento guardada: $_savedLocation',
+      );
+      notifyListeners();
+    } catch (e) {
+      Logger.logMapViewModelError('Error guardando ubicación de salida', e);
+    }
+  }
+
   @override
   void dispose() {
-    _serviceSubscription?.cancel();
+    _pluginSubscription?.cancel();
     super.dispose();
   }
 }

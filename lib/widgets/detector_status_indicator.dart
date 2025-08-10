@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../application/services/car_exit_strategy/index.dart';
+import '../application/models/car_exit_state.dart';
 
 class DetectorStateVisuals {
   final IconData icon;

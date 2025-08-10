@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_background_service/flutter_background_service.dart';
+import 'package:parking_detector_plugin/parking_detector_plugin.dart';
 import 'package:flutter/foundation.dart' show kDebugMode;
 import 'dart:convert';
 import 'package:where_is_it/services/background_service/background_service_events.dart';
@@ -40,6 +41,23 @@ class _SettingsScreenState extends State<SettingsScreen> {
       _subscriptions.add(_listenRaw(BackgroundServiceEvents.onActivityUpdate));
       _subscriptions.add(_listenCurrentStateResponses());
       _subscriptions.add(_listenLogs());
+      // Escucha directa al canal del plugin (diagnóstico)
+      _subscriptions.add(
+        ParkingDetectorPlugin.parkingEvents.listen((event) {
+          if (!kDebugMode || !_captureEnabled || !mounted) return;
+          setState(() {
+            _rawEvents.insert(0, _formatEvent('plugin.parking_events', event));
+            if (_rawEvents.length > 100) _rawEvents.removeLast();
+            // Actualizar también el estado actual mostrado en el panel
+            if (event is Map && event.containsKey('state')) {
+              final dynamic stateVal = event['state'];
+              _currentDetectorState = _mapNativeStateToDisplay(
+                stateVal?.toString(),
+              );
+            }
+          });
+        }),
+      );
       // Solicitar estado actual al abrir
       _backgroundService.invoke(BackgroundServiceCommands.getCurrentState);
     }
@@ -123,6 +141,20 @@ class _SettingsScreenState extends State<SettingsScreen> {
       return '[$ts] $name: $payload';
     } catch (_) {
       return '[$name] $data';
+    }
+  }
+
+  String _mapNativeStateToDisplay(String? native) {
+    switch (native) {
+      case 'DRIVING':
+        return 'CarExitState.driving';
+      case 'TENTATIVE_PARKED':
+        return 'CarExitState.stopped';
+      case 'CONFIRMED_PARKED':
+        return 'CarExitState.exited';
+      case 'UNKNOWN':
+      default:
+        return 'CarExitState.unknown';
     }
   }
 
@@ -255,6 +287,32 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   },
                   icon: const Icon(Icons.clear_all),
                   label: const Text('Limpiar eventos'),
+                ),
+                ElevatedButton.icon(
+                  onPressed: () async {
+                    try {
+                      final ok = await ParkingDetectorPlugin.emitTestEvent();
+                      if (!mounted) return;
+                      setState(() {
+                        _rawEvents.insert(
+                          0,
+                          _formatEvent('emitTestEvent', {'status': ok}),
+                        );
+                      });
+                    } catch (e) {
+                      if (!mounted) return;
+                      setState(() {
+                        _rawEvents.insert(
+                          0,
+                          _formatEvent('emitTestEvent', {
+                            'error': e.toString(),
+                          }),
+                        );
+                      });
+                    }
+                  },
+                  icon: const Icon(Icons.bug_report),
+                  label: const Text('Emitir evento de prueba'),
                 ),
               ],
             ),

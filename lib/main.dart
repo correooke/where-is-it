@@ -8,6 +8,7 @@ import 'package:where_is_it/application/services/permission_service.dart';
 import 'package:where_is_it/infrastructure/repositories/location_repository_impl.dart';
 import 'package:where_is_it/screens/map_view_model.dart';
 import 'package:where_is_it/services/background_service/background_service.dart';
+import 'package:parking_detector_plugin/parking_detector_plugin.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -20,6 +21,10 @@ void main() async {
   }
 
   if (!kIsWeb) {
+    // Warm-up plugin nativo para asegurar registro antes de iniciar el servicio
+    try {
+      await ParkingDetectorPlugin.getCurrentState();
+    } catch (_) {}
     await setupChannel();
     await initializeBackgroundService();
   }
