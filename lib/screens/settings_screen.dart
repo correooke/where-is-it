@@ -5,9 +5,7 @@ import 'package:parking_detector_plugin/parking_detector_plugin.dart';
 import 'package:flutter/foundation.dart' show kDebugMode;
 import 'dart:convert';
 import 'package:where_is_it/services/background_service/background_service_events.dart';
-import 'package:where_is_it/services/background_service/background_service_protocol.dart';
-import 'package:where_is_it/services/background_service/typed_listeners.dart';
-import 'package:where_is_it/widgets/active_strategy_card.dart';
+// Imports eliminados de estrategia y typed listeners
 
 class SettingsScreen extends StatefulWidget {
   const SettingsScreen({super.key});
@@ -19,7 +17,7 @@ class SettingsScreen extends StatefulWidget {
 class _SettingsScreenState extends State<SettingsScreen> {
   final FlutterBackgroundService _backgroundService =
       FlutterBackgroundService();
-  String _activeStrategyName = 'Ninguna';
+  // Eliminado indicador de estrategia
   final List<StreamSubscription> _subscriptions = [];
 
   // Debug-only state
@@ -30,13 +28,11 @@ class _SettingsScreenState extends State<SettingsScreen> {
   @override
   void initState() {
     super.initState();
-    _subscriptions.add(_getStrategyChangedListener());
-    _subscriptions.add(_getInitialActiveStrategyListener());
-    _backgroundService.invoke(BackgroundServiceCommands.getActiveStrategy);
+    // Sin estrategia
 
     if (kDebugMode) {
       _subscriptions.add(_listenRaw(BackgroundServiceEvents.onStateChanged));
-      _subscriptions.add(_listenRaw(BackgroundServiceEvents.onStrategyChanged));
+      // Eliminado onStrategyChanged (no usado)
       _subscriptions.add(_listenRaw(BackgroundServiceEvents.onCarExit));
       _subscriptions.add(_listenRaw(BackgroundServiceEvents.onActivityUpdate));
       _subscriptions.add(_listenCurrentStateResponses());
@@ -158,29 +154,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
     }
   }
 
-  StreamSubscription _getStrategyChangedListener() {
-    return _backgroundService
-        .onEvent<StrategyChangedEvent>(
-          BackgroundServiceEvents.onStrategyChanged,
-          StrategyChangedEvent.fromJson,
-        )
-        .listen((payload) {
-          if (!mounted) return;
-          setState(() => _activeStrategyName = payload.newStrategy);
-        });
-  }
-
-  StreamSubscription _getInitialActiveStrategyListener() {
-    return _backgroundService
-        .onEvent<ActiveStrategyEvent>(
-          BackgroundServiceCommands.getActiveStrategy,
-          ActiveStrategyEvent.fromJson,
-        )
-        .listen((payload) {
-          if (!mounted) return;
-          setState(() => _activeStrategyName = payload.strategyName);
-        });
-  }
+  // Eliminados listeners de estrategia
 
   // (Eliminado) _showSnackBar no es necesario sin flujo de beacons
 
@@ -205,8 +179,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
       body: ListView(
         padding: const EdgeInsets.all(16.0),
         children: [
-          // Tarjeta de estrategia activa
-          ActiveStrategyCard(activeStrategyName: _activeStrategyName),
+          // (Sin estrategia)
           if (kDebugMode) ...[
             const SizedBox(height: 16.0),
             _buildDebugPanel(context),
@@ -228,15 +201,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
               style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 8),
-            Row(
-              children: [
-                const Text(
-                  'Estrategia activa: ',
-                  style: TextStyle(fontWeight: FontWeight.w600),
-                ),
-                Flexible(child: Text(_activeStrategyName)),
-              ],
-            ),
+            // Sin indicador de estrategia
             const SizedBox(height: 4),
             Row(
               children: [
@@ -270,15 +235,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   icon: const Icon(Icons.sync),
                   label: const Text('Solicitar estado actual'),
                 ),
-                ElevatedButton.icon(
-                  onPressed: () {
-                    _backgroundService.invoke(
-                      BackgroundServiceCommands.getActiveStrategy,
-                    );
-                  },
-                  icon: const Icon(Icons.search),
-                  label: const Text('Solicitar estrategia'),
-                ),
+                // Botón de solicitar estrategia eliminado
                 ElevatedButton.icon(
                   onPressed: () {
                     setState(() {

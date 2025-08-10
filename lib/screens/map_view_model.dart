@@ -26,6 +26,7 @@ class MapViewModel extends ChangeNotifier {
   // Estado de la UI
   bool _isLoading = true;
   bool _isDetectorRunning = false;
+  Timer? _statePoller;
 
   // Suscripción a eventos del plugin nativo
   StreamSubscription<dynamic>? _pluginSubscription;
@@ -63,6 +64,20 @@ class MapViewModel extends ChangeNotifier {
     });
   }
 
+  Future<void> _pollCurrentStateOnce() async {
+    try {
+      final native = await ParkingDetectorPlugin.getCurrentState();
+      final mapped = _mapNativeStateToCarExitState(native);
+      if (_detectorState != mapped) {
+        _detectorState = mapped;
+        Logger.logMapViewModel('Estado (poll) actualizado: $_detectorState');
+        notifyListeners();
+      }
+    } catch (e) {
+      // Ignorar errores de polling
+    }
+  }
+
   CarExitState _mapNativeStateToCarExitState(String nativeState) {
     switch (nativeState) {
       case 'DRIVING':
@@ -81,7 +96,7 @@ class MapViewModel extends ChangeNotifier {
   LatLng? get savedLocation => _savedLocation;
   CarExitState get detectorState => _detectorState;
   bool get isLoading => _isLoading;
-  String get activeStrategyName => 'Detección Nativa';
+  // Eliminado: ya no se usa estrategia
 
   // Estado de ejecución del detector
   bool get isDetectorRunning => _isDetectorRunning;
@@ -160,6 +175,12 @@ class MapViewModel extends ChangeNotifier {
       await ParkingDetectorPlugin.startParkingDetection();
       Logger.logMapViewModel('Detector nativo iniciado');
       _isDetectorRunning = true;
+      // Poll inicial y programar polling periódico para asegurar sincronía
+      await _pollCurrentStateOnce();
+      _statePoller?.cancel();
+      _statePoller = Timer.periodic(const Duration(seconds: 2), (_) {
+        _pollCurrentStateOnce();
+      });
       notifyListeners();
     } catch (e) {
       Logger.logMapViewModelError('Error iniciando detector', e);
@@ -171,6 +192,8 @@ class MapViewModel extends ChangeNotifier {
       await ParkingDetectorPlugin.stopParkingDetection();
       Logger.logMapViewModel('Detector nativo detenido');
       _isDetectorRunning = false;
+      _statePoller?.cancel();
+      _statePoller = null;
       notifyListeners();
     } catch (e) {
       Logger.logMapViewModelError('Error deteniendo detector', e);
@@ -194,6 +217,7 @@ class MapViewModel extends ChangeNotifier {
   @override
   void dispose() {
     _pluginSubscription?.cancel();
+    _statePoller?.cancel();
     super.dispose();
   }
 }

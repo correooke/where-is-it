@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../widgets/detector_status_indicator.dart';
-import '../widgets/strategy_indicator.dart';
 import '../widgets/map_view.dart';
 // import '../widgets/native_detector_debug_panel.dart';
 import 'settings_screen.dart';
@@ -50,11 +49,6 @@ class _MapScreenState extends State<MapScreen> {
         MapView(
           currentLocation: model.currentLocation,
           savedLocation: model.savedLocation,
-        ),
-        Positioned(
-          left: 16,
-          bottom: 16,
-          child: StrategyIndicator(strategyName: model.activeStrategyName),
         ),
       ],
     );

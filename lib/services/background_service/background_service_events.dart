@@ -1,19 +1,9 @@
 /// Constantes para los comandos enviados desde la UI hacia el servicio en segundo plano.
 class BackgroundServiceCommands {
-  /// Solicita detener el servicio en segundo plano
-  static const String stopService = 'stopService';
-
-  /// Solicita información sobre la estrategia de detección activa
-  static const String getActiveStrategy = 'getActiveStrategy';
-
   /// Solicita obtener el estado actual del detector de salida
   static const String getCurrentState = 'getCurrentState';
 
-  /// Inicia el detector de salida del vehículo
-  static const String startDetector = 'startDetector';
-
-  /// Detiene el detector de salida del vehículo
-  static const String stopDetector = 'stopDetector';
+  // Comandos de start/stop del detector ya no se usan (se invoca directo al plugin)
 }
 
 /// Constantes para los nombres de evento del servicio en segundo plano.
@@ -27,7 +17,7 @@ class BackgroundServiceEvents {
   static const String onCarExit = 'onCarExit';
 
   /// Notifica que ha cambiado la estrategia de detección activa
-  static const String onStrategyChanged = 'onStrategyChanged';
+  // Eliminado: estrategia no usada
 
   /// Responde con el estado actual del detector
   static const String onCurrentState = 'onCurrentState';
