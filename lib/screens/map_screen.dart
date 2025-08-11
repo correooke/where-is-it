@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import '../widgets/detector_status_indicator.dart';
 import '../widgets/map_view.dart';
@@ -24,11 +25,6 @@ class _MapScreenState extends State<MapScreen> {
     return Scaffold(
       appBar: _buildAppBar(context, model),
       body: _buildBody(context, model),
-      floatingActionButton: Column(
-        mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.end,
-        children: [_buildPlayStopButton(context, model)],
-      ),
     );
   }
 
@@ -50,6 +46,12 @@ class _MapScreenState extends State<MapScreen> {
           currentLocation: model.currentLocation,
           savedLocation: model.savedLocation,
         ),
+        Positioned(
+          left: 16,
+          right: 16,
+          bottom: 16,
+          child: _buildMonitoringControl(context, model),
+        ),
       ],
     );
   }
@@ -66,22 +68,66 @@ class _MapScreenState extends State<MapScreen> {
     ];
   }
 
-  Widget _buildPlayStopButton(BuildContext context, MapViewModel model) {
+  Widget _buildMonitoringControl(BuildContext context, MapViewModel model) {
     final isRunning = model.isDetectorRunning;
-    return FloatingActionButton(
-      heroTag: 'btnPlayStop',
-      // Mostrar estado "stop" al inicio (no corriendo) y cambiar al activarse
-      backgroundColor: isRunning ? Colors.green : Colors.red,
-      tooltip: isRunning ? 'Detener monitoreo' : 'Iniciar monitoreo',
-      onPressed: () async {
-        if (isRunning) {
-          await model.stopDetector();
-        } else {
-          await model.startDetector();
-        }
-      },
-      // Icono invertido: al inicio (no corriendo) mostrar stop
-      child: Icon(isRunning ? Icons.play_arrow : Icons.stop),
+    final theme = Theme.of(context);
+    final bg =
+        isRunning
+            ? theme.colorScheme.primary
+            : theme.colorScheme.surfaceVariant;
+    final fg = isRunning ? Colors.white : theme.colorScheme.onSurfaceVariant;
+
+    return Material(
+      elevation: 4,
+      borderRadius: BorderRadius.circular(16),
+      color: bg,
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+        child: Row(
+          children: [
+            Icon(
+              isRunning ? Icons.play_circle_fill : Icons.pause_circle_filled,
+              color: fg,
+              size: 24,
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(
+                    'Monitoreo',
+                    style: theme.textTheme.labelLarge?.copyWith(
+                      color: fg,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                  const SizedBox(height: 2),
+                  Text(
+                    isRunning ? 'Detectando' : 'Sin monitoreo',
+                    style: theme.textTheme.bodySmall?.copyWith(color: fg),
+                  ),
+                ],
+              ),
+            ),
+            Switch.adaptive(
+              value: isRunning,
+              activeColor: Colors.white,
+              activeTrackColor: Colors.white.withOpacity(0.6),
+              onChanged: (v) async {
+                // Haptic feedback sutil
+                HapticFeedback.lightImpact();
+                if (v) {
+                  await model.startDetector();
+                } else {
+                  await model.stopDetector();
+                }
+              },
+            ),
+          ],
+        ),
+      ),
     );
   }
 

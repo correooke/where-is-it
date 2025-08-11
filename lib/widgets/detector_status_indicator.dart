@@ -3,12 +3,12 @@ import '../application/models/car_exit_state.dart';
 
 class DetectorStateVisuals {
   final IconData icon;
-  final Color color;
+  final Color backgroundColor;
   final String text;
 
-  DetectorStateVisuals({
+  const DetectorStateVisuals({
     required this.icon,
-    required this.color,
+    required this.backgroundColor,
     required this.text,
   });
 }
@@ -41,33 +41,33 @@ class DetectorStatusIndicatorWidget extends StatelessWidget {
   }
 
   DetectorStateVisuals _getDrivingVisuals() {
-    return DetectorStateVisuals(
+    return const DetectorStateVisuals(
       icon: Icons.directions_car,
-      color: Colors.white,
+      backgroundColor: Colors.blue,
       text: _drivingText,
     );
   }
 
   DetectorStateVisuals _getStoppedVisuals() {
-    return DetectorStateVisuals(
+    return const DetectorStateVisuals(
       icon: Icons.pause_circle_filled,
-      color: Colors.orange,
+      backgroundColor: Colors.amber,
       text: _stoppedText,
     );
   }
 
   DetectorStateVisuals _getExitedVisuals() {
-    return DetectorStateVisuals(
-      icon: Icons.logout,
-      color: Colors.lightGreenAccent,
+    return const DetectorStateVisuals(
+      icon: Icons.local_parking,
+      backgroundColor: Colors.green,
       text: _exitedText,
     );
   }
 
   DetectorStateVisuals _getUnknownVisuals() {
-    return DetectorStateVisuals(
-      icon: Icons.help_outline,
-      color: Colors.white70,
+    return const DetectorStateVisuals(
+      icon: Icons.hourglass_top,
+      backgroundColor: Colors.grey,
       text: _unknownText,
     );
   }
@@ -75,24 +75,27 @@ class DetectorStatusIndicatorWidget extends StatelessWidget {
   // Textos para internacionalización
   static const String _drivingText = 'Conduciendo';
   static const String _stoppedText = 'Detenido';
-  static const String _exitedText = 'Salida';
+  static const String _exitedText = 'Estacionado';
   static const String _unknownText = 'Detectando';
 
   @override
   Widget build(BuildContext context) {
     final visuals = _getVisualsForState(state);
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 8.0),
-      child: Row(
-        children: [
-          Icon(visuals.icon, color: visuals.color, size: 20),
-          const SizedBox(width: 4),
-          Text(
-            visuals.text,
-            style: TextStyle(fontSize: 12, color: visuals.color),
-          ),
-        ],
+    return Chip(
+      avatar: Icon(visuals.icon, color: Colors.white, size: 16),
+      label: Text(
+        visuals.text,
+        style: const TextStyle(
+          fontSize: 12,
+          fontWeight: FontWeight.w600,
+          color: Colors.white,
+        ),
       ),
+      backgroundColor: visuals.backgroundColor,
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 0),
+      visualDensity: VisualDensity.compact,
+      materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+      shape: StadiumBorder(side: BorderSide(color: visuals.backgroundColor)),
     );
   }
 }

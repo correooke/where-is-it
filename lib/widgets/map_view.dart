@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'dart:developer' as dev;
+import 'package:url_launcher/url_launcher.dart';
+import 'dart:ui' as ui;
 
 class MapView extends StatefulWidget {
   final LatLng? currentLocation;
@@ -12,7 +14,7 @@ class MapView extends StatefulWidget {
 }
 
 class _MapViewState extends State<MapView> {
-  GoogleMapController? _controller;
+  BitmapDescriptor? _carIcon;
 
   // Ubicación por defecto: Ciudad de México
   static const LatLng _defaultLocation = LatLng(19.4326, -99.1332);
@@ -72,8 +74,8 @@ class _MapViewState extends State<MapView> {
   }
 
   void _onMapCreated(GoogleMapController controller) {
-    _controller = controller;
     dev.log(_logMapCreatedSuccessMessage, name: 'MapView');
+    _ensureCarIcon();
   }
 
   void _addMarker(
@@ -89,31 +91,97 @@ class _MapViewState extends State<MapView> {
         position: position,
         infoWindow: InfoWindow(title: title),
         icon: icon,
+        onTap: () => _onMarkerTap(markerId, position),
       ),
     );
   }
 
-  Set<Marker> _buildMarkers() {
-    Set<Marker> markers = {};
-
-    _addMarker(
-      markers,
-      _currentLocationMarkerId,
-      _effectiveLocation,
-      _currentLocationTitle,
-      BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueGreen),
+  Future<void> _onMarkerTap(String markerId, LatLng position) async {
+    if (markerId != _savedLocationMarkerId) return;
+    final lat = position.latitude;
+    final lng = position.longitude;
+    // Intentar abrir Google Maps con navegación al destino
+    final uri = Uri.parse(
+      'https://www.google.com/maps/dir/?api=1&destination=$lat,$lng&travelmode=driving',
     );
+    if (await canLaunchUrl(uri)) {
+      await launchUrl(uri, mode: LaunchMode.externalApplication);
+    }
+  }
 
+  Set<Marker> _buildMarkers() {
+    final Set<Marker> markers = {};
+
+    // Si hay ubicación guardada, mostrar icono de auto en esa posición
     if (widget.savedLocation != null) {
+      // Marcador de auto para ubicación guardada (ícono de coche)
       _addMarker(
         markers,
         _savedLocationMarkerId,
         widget.savedLocation!,
         _savedLocationTitle,
-        BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueBlue),
+        _carIcon ??
+            BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueAzure),
+      );
+    } else {
+      // Sin ubicación guardada: pequeño indicador de posición actual
+      _addMarker(
+        markers,
+        _currentLocationMarkerId,
+        _effectiveLocation,
+        _currentLocationTitle,
+        BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueRed),
       );
     }
 
     return markers;
+  }
+
+  Future<void> _ensureCarIcon() async {
+    if (_carIcon != null) return;
+    try {
+      final icon = await _createCarMarkerIcon(
+        size: 96,
+        background: Colors.blue,
+        foreground: Colors.white,
+      );
+      if (mounted) setState(() => _carIcon = icon);
+    } catch (_) {}
+  }
+
+  Future<BitmapDescriptor> _createCarMarkerIcon({
+    required int size,
+    required Color background,
+    required Color foreground,
+  }) async {
+    final ui.PictureRecorder recorder = ui.PictureRecorder();
+    final Canvas canvas = Canvas(recorder);
+    final double s = size.toDouble();
+    final Paint paint = Paint()..color = background;
+    canvas.drawCircle(Offset(s / 2, s / 2), s / 2, paint);
+
+    final TextPainter tp = TextPainter(
+      textDirection: TextDirection.ltr,
+      textAlign: TextAlign.center,
+    );
+    final TextSpan span = TextSpan(
+      text: String.fromCharCode(Icons.directions_car.codePoint),
+      style: TextStyle(
+        fontSize: s * 0.6,
+        fontFamily: Icons.directions_car.fontFamily,
+        package: Icons.directions_car.fontPackage,
+        color: foreground,
+      ),
+    );
+    tp.text = span;
+    tp.layout();
+    final double dx = (s - tp.width) / 2;
+    final double dy = (s - tp.height) / 2;
+    tp.paint(canvas, Offset(dx, dy));
+
+    final ui.Image img = await recorder.endRecording().toImage(size, size);
+    final byteData = await img.toByteData(format: ui.ImageByteFormat.png);
+    final bytes = byteData!.buffer.asUint8List();
+    return BitmapDescriptor.fromBytes(bytes);
   }
 }
