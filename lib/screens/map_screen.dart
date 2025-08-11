@@ -71,11 +71,13 @@ class _MapScreenState extends State<MapScreen> {
   Widget _buildMonitoringControl(BuildContext context, MapViewModel model) {
     final isRunning = model.isDetectorRunning;
     final theme = Theme.of(context);
-    final bg =
+    final bool isDark = theme.brightness == Brightness.dark;
+    final Color bg =
         isRunning
             ? theme.colorScheme.primary
-            : theme.colorScheme.surfaceVariant;
-    final fg = isRunning ? Colors.white : theme.colorScheme.onSurfaceVariant;
+            : (isDark ? Colors.grey.shade800 : Colors.grey.shade300);
+    final Color fg =
+        isRunning ? Colors.white : (isDark ? Colors.white : Colors.black87);
 
     return Material(
       elevation: 4,
