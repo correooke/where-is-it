@@ -6,7 +6,7 @@ plugins {
 }
 
 android {
-    namespace = "com.example.where_is_it"
+    namespace = "com.okecode.where_is_it"
     compileSdk = flutter.compileSdkVersion
     ndkVersion = "27.0.12077973"
 
@@ -22,7 +22,7 @@ android {
 
     defaultConfig {
         // TODO: Specify your own unique Application ID (https://developer.android.com/studio/build/application-id.html).
-        applicationId = "com.example.where_is_it"
+        applicationId = "com.okecode.where_is_it"
         // You can update the following values to match your application needs.
         // For more information, see: https://flutter.dev/to/review-gradle-config.
         // Restrict to Android 10+ (API level 29)

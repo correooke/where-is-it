@@ -1,5 +1,5 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-  package="com.example.parking_detector_plugin">
+    package="com.okecode.parking_detector_plugin">
 
   <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
   <uses-permission android:name="android.permission.FOREGROUND_SERVICE_LOCATION" />
@@ -9,7 +9,7 @@
 
   <application>
     <service
-      android:name="com.example.parking_detector_plugin.service.ParkingDetectionService"
+              android:name="com.okecode.parking_detector_plugin.service.ParkingDetectionService"
       android:enabled="true"
       android:exported="false"
       android:foregroundServiceType="location" />

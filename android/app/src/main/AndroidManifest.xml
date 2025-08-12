@@ -78,7 +78,7 @@
 
         <!-- Servicio de detección de estacionamiento -->
         <service
-            android:name="com.example.parking_detector_plugin.service.ParkingDetectionService"
+            android:name="com.okecode.parking_detector_plugin.service.ParkingDetectionService"
             android:enabled="true"
             android:exported="false"
             android:foregroundServiceType="location" />
