@@ -30,10 +30,10 @@ object Constants {
     const val ACTION_PARKING_DATA = "com.okecode.where_is_it.PARKING_DATA"
 
     // Umbrales (m/s)
-    // STOP_SPEED ≈ 0.5 m/s (~1.8 km/h) para tolerar pequeñas variaciones/ruido
+    // STOP_SPEED ≈ 0.1 m/s (~0.36 km/h) para tolerar pequeñas variaciones/ruido
     const val STOP_SPEED = 0.1f
-    // DRIVING_SPEED ≈ 3.5 m/s (~12.6 km/h) por encima de caminar/trote
-    const val DRIVING_SPEED = 1.2f
+    // DRIVING_SPEED = 4.17 m/s (15 km/h) - velocidad mínima para considerar conducción
+    const val DRIVING_SPEED = 4.17f
 
     // Activity detection thresholds
     const val STILL_ACTIVITY = com.google.android.gms.location.DetectedActivity.STILL

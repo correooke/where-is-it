@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">WhereIsIt</string>
+    <string name="app_description">Encuentra tu auto fácilmente con detección automática de estacionamiento</string>
+    <string name="notification_channel_name">WhereIsIt Notifications</string>
+    <string name="notification_channel_description">Notificaciones de detección de estacionamiento</string>
+</resources>

@@ -1,5 +1,5 @@
 name: where_is_it
-description: "App to track your car location."
+description: "Encuentra tu auto fácilmente con detección automática de estacionamiento. WhereIsIt te ayuda a localizar tu vehículo usando GPS y reconocimiento de actividad."
 # The following line prevents the package from being accidentally published to
 # pub.dev using `flutter pub publish`. This is preferred for private packages.
 publish_to: "none" # Remove this line if you wish to publish to pub.dev
