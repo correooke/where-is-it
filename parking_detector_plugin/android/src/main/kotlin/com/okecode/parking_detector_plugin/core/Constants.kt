@@ -35,6 +35,16 @@ object Constants {
     // DRIVING_SPEED = 4.17 m/s (15 km/h) - velocidad mínima para considerar conducción
     const val DRIVING_SPEED = 4.17f
 
+    // Ventana de confirmación para considerar conducción por velocidad sostenida
+    // Recomendado >= 10s. Con intervalos de ubicación de 30s, implica requerir al menos 2 lecturas consecutivas altas.
+    const val DRIVING_CONFIRMATION_WINDOW_MS = 10_000L
+
+    // Ventana más estricta para salir de CONFIRMED_PARKED solo por velocidad sostenida
+    // Recomendado ~30s para reducir falsos positivos cuando no hay evento ENTER confiable
+    const val CONFIRMED_TO_DRIVING_SUSTAINED_WINDOW_MS = 30_000L
+
+
+
     // Activity detection thresholds
     const val STILL_ACTIVITY = com.google.android.gms.location.DetectedActivity.STILL
     const val ACTIVITY_CONFIDENCE_THRESHOLD = 70
